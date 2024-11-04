@@ -1,8 +1,6 @@
 <template>
   <div class="home">
-    <div v-if="isLoggedIn">
-      <p>使用者名稱: {{ user.displayName }}</p>
-    </div>
+
   </div>
 </template>
 
