@@ -33,7 +33,7 @@ export default createStore({
 
   },
   actions: {
-    async register(context, { email, password, name }) {
+    async register(context, {email, password, name}) {
       const response = await createUserWithEmailAndPassword(firebaseAuth, email, password)
       if (response) {
         await updateProfile(response.user, {
@@ -48,7 +48,7 @@ export default createStore({
       }
     },
 
-    async logIn(context, { email, password }) {
+    async logIn(context, {email, password}) {
       const response = await signInWithEmailAndPassword(firebaseAuth, email, password)
       if (response) {
         context.commit('SET_USER_DISPLAYNAME', response.user.displayName)
@@ -65,7 +65,10 @@ export default createStore({
       context.commit('SET_USER_DISPLAYNAME', null)
       context.commit('SET_USER_EMAIL', null)
       context.commit('SET_LOGGED_IN', false)
-    },
+    }, catch(error) {
+      console.error(error)
+    }
+
     // async fetchUser(context, user) {
     //   context.commit("SET_LOGGED_IN", user !== null);
     //   if (user) {
