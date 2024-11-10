@@ -26,7 +26,7 @@
                 <p>使用者名稱: {{ user.displayName }}</p>
             </div>
             <router-link v-if="isLoggedIn" class="btn btn-outline-success my-2 my-sm-0" to="logout">登出</router-link>
-            <router-link v-else class="btn btn-outline-success my-2 my-sm-0" to="login">登入 / 註冊</router-link>
+            <router-link v-else class="btn btn-outline-success my-2 my-sm-0" to="/login">登入 / 註冊</router-link>
         </div>
     </nav>
 </template>
