@@ -1,6 +1,7 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-light custom-bg">
-    <router-link class="navbar-brand" to="/">Home</router-link>
+    <font-awesome-icon :icon="['fas', 'person-running']" size="2xl" style="color: #FFD43B; margin-right: 20px;" />
+        <router-link class="navbar-brand" to="/">Playground</router-link>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -35,6 +36,7 @@
 </template>
 
 <script>
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 export default {
   computed: {
     user() {
