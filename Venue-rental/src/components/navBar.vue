@@ -18,7 +18,7 @@
           <router-link class="nav-link" to="#" active-class="font-weight-bold">訂單查詢</router-link>
         </li>
         <li class="nav-item">
-          <router-link class="nav-link" to="/user/manage" active-class="font-weight-bold">後臺管理</router-link>
+          <router-link class="nav-link" to="/manage" active-class="font-weight-bold">後臺管理</router-link>
         </li>
       </ul>
 
