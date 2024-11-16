@@ -2,9 +2,17 @@
   <div class="min-h-screen flex justify-center px-4 mt-10">
     <div class="max-w-md w-full">
       <form @submit.prevent="handleLogin">
-        <h3 class="text-2xl font-semibold text-center mb-6">會員登入</h3>
+        <h3 class="text-2xl font-semibold text-center mb-5">會員登入</h3>
 
         <div class="space-y-4">
+          <!-- Register Button -->
+        <div class="mt-4 flex justify-center pb-6">
+          <router-link 
+            to="/register"
+            class="text-decoration underline text-lg text-blue-500 hover:text-blue-600 transition-colors duration-200">
+            還沒有會員嗎？請按此註冊
+          </router-link>
+        </div>
           <!-- Email Input -->
           <div class="flex items-center justify-end space-x-2">
             <label class="w-20 text-right">電子郵件：</label>
@@ -12,7 +20,7 @@
               <input 
                 type="email" 
                 v-model="user.email"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -24,7 +32,7 @@
               <input 
                 type="password" 
                 v-model="user.password"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -44,21 +52,12 @@
         <div class="mt-4 flex justify-center">
           <router-link 
             to="/forgot-password"
-            class="text-sm text-blue-500 hover:text-blue-600 transition-colors duration-200"
+            class="text-decoration underline text-sm text-blue-500 hover:text-blue-600 transition-colors duration-200"
           >
             忘記密碼?
           </router-link>
         </div>
 
-        <!-- Register Button -->
-        <div class="mt-4 flex justify-center">
-          <router-link 
-            to="/register"
-            class="inline-block w-24 px-4 py-2 bg-blue-500 text-white text-center rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
-          >
-            註冊
-          </router-link>
-        </div>
       </form>
     </div>
   </div>

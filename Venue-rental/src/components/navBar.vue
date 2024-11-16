@@ -1,6 +1,6 @@
 <template>
   <nav class="bg-[#39B3E3] p-4 text-bg text-white">
-    <div class="container mx-auto flex flex-wrap items-center justify-between">
+    <div class="container mx-auto flex flex-wrap items-center">
       <!-- Logo and Brand -->
       <div class="flex items-center">
         <font-awesome-icon 
@@ -33,32 +33,32 @@
       <!-- Navigation Links -->
       <div 
         :class="[isOpen ? 'block' : 'hidden', 'lg:flex lg:items-center w-full lg:w-auto']"
-        class="mt-4 lg:mt-0"
+        class="mt-4 ml-6 lg:mt-0"
       >
-        <ul class="lg:flex space-y-2 lg:space-y-0 lg:space-x-4">
+        <ul class="lg:flex space-y-2 lg:space-y-0 lg:space-x-1 pr-72" >
           <li>
             <router-link 
-              to="#" 
-              class="block px-4 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
-              active-class="font-bold"
+              to="/" 
+              class="block px-1 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
+              active-class="font-bold underline"
             >
               場地租借
             </router-link>
           </li>
           <li>
             <router-link 
-              to="#" 
-              class="block px-4 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
-              active-class="font-bold"
+              to="/" 
+              class="block px-1 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
+              active-class="font-bold underline"
             >
               場地查詢
             </router-link>
           </li>
           <li>
             <router-link 
-              to="#" 
-              class="block px-4 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
-              active-class="font-bold"
+              to="/" 
+              class="block px-1 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
+              active-class="font-bold underline"
             >
               訂單查詢
             </router-link>
@@ -66,8 +66,8 @@
           <li>
             <router-link 
               to="/user/manage" 
-              class="block px-4 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
-              active-class="font-bold"
+              class="block px-1 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
+              active-class="font-bold underline"
             >
               後臺管理
             </router-link>
