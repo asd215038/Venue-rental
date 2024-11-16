@@ -9,11 +9,8 @@
           <div class="flex items-center justify-end space-x-2">
             <label class="w-20 text-right">姓名：</label>
             <div class="flex-1 max-w-xs">
-              <input 
-                type="text" 
-                v-model="user.userName"
-                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+              <input type="text" v-model="user.userName"
+                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
             </div>
           </div>
 
@@ -21,11 +18,8 @@
           <div class="flex items-center justify-end space-x-2">
             <label class="w-20 text-right">電子郵件：</label>
             <div class="flex-1 max-w-xs">
-              <input 
-                type="email" 
-                v-model="user.email"
-                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+              <input type="email" v-model="user.email"
+                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
             </div>
           </div>
 
@@ -33,11 +27,8 @@
           <div class="flex items-center justify-end space-x-2">
             <label class="w-20 text-right">密碼：</label>
             <div class="flex-1 max-w-xs">
-              <input 
-                type="password" 
-                v-model="user.password"
-                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+              <input type="password" v-model="user.password"
+                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
             </div>
           </div>
 
@@ -45,11 +36,8 @@
           <div class="flex items-center justify-end space-x-2">
             <label class="w-20 text-right">確認密碼：</label>
             <div class="flex-1 max-w-xs">
-              <input 
-                type="password" 
-                v-model="confirmPassword"
-                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+              <input type="password" v-model="confirmPassword"
+                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
             </div>
           </div>
 
@@ -57,11 +45,8 @@
           <div class="flex items-center justify-end space-x-2">
             <label class="w-20 text-right">手機號碼：</label>
             <div class="flex-1 max-w-xs">
-              <input 
-                type="text" 
-                v-model="user.phoneNumber"
-                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+              <input type="text" v-model="user.phoneNumber"
+                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
             </div>
           </div>
 
@@ -69,10 +54,8 @@
           <div class="flex items-center justify-end space-x-2">
             <label class="w-20 text-right">性別：</label>
             <div class="flex-1 max-w-xs">
-              <select 
-                v-model="user.gender"
-                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
+              <select v-model="user.gender"
+                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 <option value="male">男</option>
                 <option value="female">女</option>
                 <option value="other">其他</option>
@@ -84,31 +67,24 @@
           <div class="flex items-center justify-end space-x-2">
             <label class="w-20 text-right">出生日期：</label>
             <div class="flex-1 max-w-xs">
-              <input 
-                type="date" 
-                v-model="user.birth"
-                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+              <input type="date" v-model="user.birth"
+                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
             </div>
           </div>
         </div>
 
         <!-- Register Button -->
         <div class="mt-6 flex justify-center">
-          <button 
-            type="submit"
-            class="px-6 py-2 text-blue-500 border border-blue-500 rounded-md hover:bg-blue-500 hover:text-white focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
-          >
+          <button type="submit"
+            class="px-6 py-2 text-blue-500 border border-blue-500 rounded-md hover:bg-blue-500 hover:text-white focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200">
             註冊
           </button>
         </div>
 
         <!-- Login Link -->
         <div class="mt-4 flex justify-center">
-          <router-link 
-            to="/login"
-            class="text-decoration underline text-sm text-blue-500 hover:text-blue-600 transition-colors duration-200"
-          >
+          <router-link to="/login"
+            class="text-decoration underline text-sm text-blue-500 hover:text-blue-600 transition-colors duration-200">
             已經有帳號了？請按此登入
           </router-link>
         </div>
@@ -132,9 +108,7 @@ export default {
         enabled: false,
         phoneNumber: "",
         gender: "",
-        birthYear: "",
-        birthMonth: "",
-        birthDay: ""
+        birth: ""
       },
       confirmPassword: "",
       years: Array.from({ length: 35 }, (_, i) => 1990 + i)
@@ -160,7 +134,7 @@ export default {
           password: this.user.password,
           name: this.user.userName
         });
-        
+
         await addDoc(collection(db, "users"), {
           userName: this.user.userName,
           isAdmin: this.user.isAdmin,
@@ -169,7 +143,7 @@ export default {
           enabled: this.user.enabled,
           phoneNumber: this.user.phoneNumber,
           gender: this.user.gender,
-          birthDate: `${this.user.birthYear}-${this.user.birthMonth}-${this.user.birthDay}`
+          birthDate: this.user.birth 
         });
 
         this.$router.push("/");
