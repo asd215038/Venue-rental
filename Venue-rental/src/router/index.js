@@ -19,6 +19,7 @@ const router = createRouter({
     { path: "/manage/venue", component: VenueManage },
     { path: "/manage/addVenue", component: addVenue },
     { path: "/manage", component: manage },
+    { path: "/manage/addVenue/:venueId?", name: 'EditVenue',component: addVenue, props:true},
   ]
 })
 
