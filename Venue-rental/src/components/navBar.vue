@@ -1,61 +1,134 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-light custom-bg">
-    <router-link class="navbar-brand" to="/">Home</router-link>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+  <nav class="bg-[#39B3E3] p-4 text-bg text-white">
+    <div class="container mx-auto flex flex-wrap items-center">
+      <!-- Logo and Brand -->
+      <div class="flex items-center">
+        <font-awesome-icon 
+          :icon="['fas', 'person-running']" 
+          class="text-yellow-400 mr-5 text-2xl"
+        />
+        <router-link 
+          to="/" 
+          class="text-white text-lg font-semibold"
+        >
+          Playground
+        </router-link>
+      </div>
 
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item">
-          <router-link class="nav-link" to="#" active-class="font-weight-bold">場地租借</router-link>
-        </li>
-        <li class="nav-item">
-          <router-link class="nav-link" to="#" active-class="font-weight-bold">場地查詢</router-link>
-        </li>
-        <li class="nav-item">
-          <router-link class="nav-link" to="#" active-class="font-weight-bold">訂單查詢</router-link>
-        </li>
-        <li class="nav-item">
-          <router-link class="nav-link" to="/manage" active-class="font-weight-bold">後臺管理</router-link>
-        </li>
-      </ul>
+      <!-- Mobile Menu Button -->
+      <button 
+        class="lg:hidden block text-white hover:text-yellow-300 focus:outline-none"
+        @click="isOpen = !isOpen"
+      >
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path 
+            stroke-linecap="round" 
+            stroke-linejoin="round" 
+            stroke-width="2" 
+            d="M4 6h16M4 12h16m-16 6h16"
+          />
+        </svg>
+      </button>
 
-      <div class="navbar-nav ml-auto">
-        <router-link class="nav-link btn btn-outline-primary mr-2" to="/">首頁</router-link>
-        <div v-if="isLoggedIn" class="userName mr-2">
-          <p>{{ user.displayName }}</p>
+      <!-- Navigation Links -->
+      <div 
+        :class="[isOpen ? 'block' : 'hidden', 'lg:flex lg:items-center w-full lg:w-auto']"
+        class="mt-4 ml-6 lg:mt-0"
+      >
+        <ul class="lg:flex space-y-2 lg:space-y-0 lg:space-x-1 pr-72" >
+          <li>
+            <router-link 
+              to="/" 
+              class="block px-1 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
+              active-class="font-bold underline"
+            >
+              場地租借
+            </router-link>
+          </li>
+          <li>
+            <router-link 
+              to="/" 
+              class="block px-1 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
+              active-class="font-bold underline"
+            >
+              場地查詢
+            </router-link>
+          </li>
+          <li>
+            <router-link 
+              to="/" 
+              class="block px-1 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
+              active-class="font-bold underline"
+            >
+              訂單查詢
+            </router-link>
+          </li>
+          <li>
+            <router-link 
+              to="/user/manage" 
+              class="block px-1 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
+              active-class="font-bold underline"
+            >
+              後臺管理
+            </router-link>
+          </li>
+        </ul>
+
+        <!-- Auth Buttons -->
+        <div class="lg:ml-4 mt-4 lg:mt-0 flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-2">
+          <router-link 
+            to="/" 
+            class="px-4 py-2 text-white hover:text-yellow-300 transition duration-150"
+          >
+            首頁
+          </router-link>
+          
+          <div v-if="isLoggedIn" class="flex items-center px-4">
+            <p class="text-white">{{ user.displayName }}</p>
+          </div>
+          
+          <router-link 
+            v-if="isLoggedIn" 
+            to="logout" 
+            class="px-4 py-2 text-white hover:text-yellow-300 transition duration-150"
+          >
+            登出
+          </router-link>
+          
+          <router-link 
+            v-else 
+            to="/login" 
+            class="px-4 py-2 text-white hover:text-yellow-300 transition duration-150"
+          >
+            登入 / 註冊
+          </router-link>
         </div>
-        <router-link v-if="isLoggedIn" class="btn btn-outline-success my-2 my-sm-0" to="logout">登出</router-link>
-        <router-link v-else class="btn btn-outline-success my-2 my-sm-0" to="/login">登入 / 註冊</router-link>
       </div>
     </div>
   </nav>
 </template>
 
 <script>
+import { ref } from 'vue'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
 export default {
+  components: {
+    FontAwesomeIcon
+  },
+  setup() {
+    const isOpen = ref(false)
+    return {
+      isOpen
+    }
+  },
   computed: {
     user() {
-      return this.$store.state.user;
+      return this.$store.state.user
     },
     isLoggedIn() {
-      return this.$store.state.user.loggedIn;
+      return this.$store.state.user.loggedIn
     }
   }
-};
+}
 </script>
-
-<style>
-.custom-bg {
-  background-color: #39B3E3 !important;
-}
-.userName {
-  display: flex;
-  align-items: center;
-}
-.font-weight-bold {
-  font-weight: bold;
-}
-</style>

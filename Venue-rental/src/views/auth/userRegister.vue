@@ -1,82 +1,97 @@
 <template>
-  <div class="container m-5">
-    <form action="#" @submit.prevent="registerAndPost">
-      <h3>註冊</h3>
+  <div class="min-h-screen flex justify-center px-4 mt-10">
+    <div class="max-w-md w-full">
+      <form @submit.prevent="registerAndPost">
+        <h3 class="text-2xl font-semibold text-center mb-6">會員註冊</h3>
 
-      <!-- 註冊表單開始 -->
-      <div class="form-row">
-        <div class="form-group col-md-6">
-          <label>姓名</label>
-          <input type="text" class="form-control form-control-lg" v-model="user.userName" />
+        <div class="space-y-4">
+          <!-- Name Input -->
+          <div class="flex items-center justify-end space-x-2">
+            <label class="w-20 text-right">姓名：</label>
+            <div class="flex-1 max-w-xs">
+              <input type="text" v-model="user.userName"
+                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+            </div>
+          </div>
+
+          <!-- Email Input -->
+          <div class="flex items-center justify-end space-x-2">
+            <label class="w-20 text-right">電子郵件：</label>
+            <div class="flex-1 max-w-xs">
+              <input type="email" v-model="user.email"
+                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+            </div>
+          </div>
+
+          <!-- Password Input -->
+          <div class="flex items-center justify-end space-x-2">
+            <label class="w-20 text-right">密碼：</label>
+            <div class="flex-1 max-w-xs">
+              <input type="password" v-model="user.password"
+                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+            </div>
+          </div>
+
+          <!-- Confirm Password Input -->
+          <div class="flex items-center justify-end space-x-2">
+            <label class="w-20 text-right">確認密碼：</label>
+            <div class="flex-1 max-w-xs">
+              <input type="password" v-model="confirmPassword"
+                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+            </div>
+          </div>
+
+          <!-- Phone Number Input -->
+          <div class="flex items-center justify-end space-x-2">
+            <label class="w-20 text-right">手機號碼：</label>
+            <div class="flex-1 max-w-xs">
+              <input type="text" v-model="user.phoneNumber"
+                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+            </div>
+          </div>
+
+          <!-- Gender Select -->
+          <div class="flex items-center justify-end space-x-2">
+            <label class="w-20 text-right">性別：</label>
+            <div class="flex-1 max-w-xs">
+              <select v-model="user.gender"
+                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option value="male">男</option>
+                <option value="female">女</option>
+                <option value="other">其他</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Birth Date Selects -->
+          <div class="flex items-center justify-end space-x-2">
+            <label class="w-20 text-right">出生日期：</label>
+            <div class="flex-1 max-w-xs">
+              <input type="date" v-model="user.birth"
+                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+            </div>
+          </div>
         </div>
 
-        <div class="form-group col-md-6">
-          <label>信箱</label>
-          <input type="email" class="form-control form-control-lg" v-model="user.email" />
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group col-md-6">
-          <label>密碼</label>
-          <input type="password" class="form-control form-control-lg" v-model="user.password" />
+        <!-- Register Button -->
+        <div class="mt-6 flex justify-center">
+          <button type="submit"
+            class="px-6 py-2 text-blue-500 border border-blue-500 rounded-md hover:bg-blue-500 hover:text-white focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200">
+            註冊
+          </button>
         </div>
 
-        <div class="form-group col-md-6">
-          <label>確認密碼</label>
-          <input type="password" class="form-control form-control-lg" v-model="confirmPassword" />
+        <!-- Login Link -->
+        <div class="mt-4 flex justify-center">
+          <router-link to="/login"
+            class="text-decoration underline text-sm text-blue-500 hover:text-blue-600 transition-colors duration-200">
+            已經有帳號了？請按此登入
+          </router-link>
         </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group col-md-6">
-          <label>手機號碼</label>
-          <input type="text" class="form-control form-control-lg" v-model="user.phoneNumber" />
-        </div>
-
-        <div class="form-group col-md-6">
-          <label>性別</label>
-          <select class="form-control form-control-lg" v-model="user.gender">
-            <option value="male">男</option>
-            <option value="female">女</option>
-            <option value="other">其他</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group col-md-4">
-          <label>出生年份</label>
-          <select class="form-control form-control-lg" v-model="user.birthYear">
-            <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
-          </select>
-        </div>
-
-        <div class="form-group col-md-4">
-          <label>出生月份</label>
-          <select class="form-control form-control-lg" v-model="user.birthMonth">
-            <option v-for="month in 12" :key="month" :value="month">{{ month }}</option>
-          </select>
-        </div>
-
-        <div class="form-group col-md-4">
-          <label>出生日期</label>
-          <select class="form-control form-control-lg" v-model="user.birthDay">
-            <option v-for="day in daysInMonth" :key="day" :value="day">{{ day }}</option>
-          </select>
-        </div>
-      </div>
-
-      <button type="submit" class="btn btn-dark btn-lg btn-block">註冊</button>
-
-      <p class="forgot-password text-right">
-        已經註冊過了?
-        <router-link to="/login">登入</router-link>
-      </p>
-    </form>
+      </form>
+    </div>
   </div>
 </template>
-
 
 <script>
 import { db } from '@/config/firebaseConfig';
@@ -93,9 +108,7 @@ export default {
         enabled: false,
         phoneNumber: "",
         gender: "",
-        birthYear: "",
-        birthMonth: "",
-        birthDay: ""
+        birth: ""
       },
       confirmPassword: "",
       years: Array.from({ length: 35 }, (_, i) => 1990 + i)
@@ -116,13 +129,12 @@ export default {
       }
 
       try {
-        // 先執行 handleRegister 的功能
         await this.$store.dispatch('register', {
           email: this.user.email,
           password: this.user.password,
           name: this.user.userName
         });
-        // 成功後執行 post 的 Firestore 儲存操作
+
         await addDoc(collection(db, "users"), {
           userName: this.user.userName,
           isAdmin: this.user.isAdmin,
@@ -131,10 +143,9 @@ export default {
           enabled: this.user.enabled,
           phoneNumber: this.user.phoneNumber,
           gender: this.user.gender,
-          birthDate: `${this.user.birthYear}-${this.user.birthMonth}-${this.user.birthDay}`
+          birthDate: this.user.birth 
         });
 
-        // 註冊成功後重定向
         this.$router.push("/");
       } catch (error) {
         console.log(error);
