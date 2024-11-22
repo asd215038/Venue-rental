@@ -15,11 +15,12 @@ const router = createRouter({
     { path: "/login", component: userLogin },
     { path: "/register", component: userRegister },
     { path: "/logout", component: userLogout },
+    // 後臺管理
+    { path: "/manage", component: manage },
     { path: "/manage/user", component: UserManageVIew },
     { path: "/manage/venue", component: VenueManage },
-    { path: "/manage/addVenue", component: addVenue },
-    { path: "/manage", component: manage },
-    { path: "/manage/addVenue/:venueId?", name: 'EditVenue',component: addVenue, props:true},
+    { path: "/manage/venue/add", component: addVenue },
+    { path: "/manage/venue/edit/:venueId?", name: 'EditVenue',component: addVenue, props:true},
   ]
 })
 

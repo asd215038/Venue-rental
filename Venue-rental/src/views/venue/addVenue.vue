@@ -1,56 +1,124 @@
 <template>
-  <div class="container m-5">
-    <form action="#" @submit.prevent>
-      <h3 v-if="actionIsEdit">編輯場地</h3>
-      <h3 v-else>新增場地</h3>
+  <div class="max-w-3xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <!-- 標題 -->
+      <h2 class="text-2xl font-bold text-blue-500 mb-6">
+        {{ actionIsEdit ? '編輯場地' : '新增場地' }}
+      </h2>
 
-      <!-- 註冊表單開始 -->
-      <div class="form-row">
-        <div class="form-group col-md-6">
-          <label>場地名稱</label>
-          <input type="text" class="form-control form-control-lg" v-model="venue.venues_name" />
+      <!-- 表單 -->
+      <form @submit.prevent>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <!-- 場地名稱 -->
+          <div class="form-group">
+            <label class="block text-gray-700 text-sm font-bold mb-2">
+              場地名稱
+            </label>
+            <input 
+              type="text" 
+              v-model="venue.venues_name"
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="請輸入場地名稱"
+            />
+          </div>
+
+          <!-- 每小時費用 -->
+          <div class="form-group">
+            <label class="block text-gray-700 text-sm font-bold mb-2">
+              每小時費用
+            </label>
+            <div class="relative">
+              <span class="absolute left-3 top-2 text-gray-500">$</span>
+              <input 
+                type="number" 
+                v-model="venue.price_per_hour"
+                class="w-full pl-8 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="請輸入費用"
+              />
+            </div>
+          </div>
+
+          <!-- 容納人數 -->
+          <div class="form-group md:col-span-2">
+            <label class="block text-gray-700 text-sm font-bold mb-2">
+              容納人數
+            </label>
+            <input 
+              type="number" 
+              v-model="venue.capacity"
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="請輸入容納人數"
+            />
+          </div>
         </div>
 
-        <div class="form-group col-md-6">
-          <label>每小時費用</label>
-          <input type="text" class="form-control form-control-lg" v-model="venue.price_per_hour" />
+        <!-- 提交按鈕 -->
+        <div class="flex justify-end space-x-4">
+          <button 
+            type="button"
+            @click="$router.push('/manage/venue')"
+            class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            取消
+          </button>
+          <button 
+            v-if="actionIsEdit"
+            type="submit"
+            @click="openEditModal(venue.venueId)"
+            class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          >
+            確認編輯
+          </button>
+          <button 
+            v-else
+            type="submit"
+            @click="addVenue"
+            class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          >
+            新增場地
+          </button>
         </div>
-      </div>
+      </form>
+    </div>
 
-      <div class="form-row">
-        <div class="form-group col-md-6">
-          <label>容納人數</label>
-          <input type="text" class="form-control form-control-lg" v-model="venue.capacity" />
-        </div>
-      </div>
-      <button v-if="actionIsEdit" type="submit" class="btn btn-dark btn-lg btn-block"
-        @click="openEditModal(venue.venueId)">編輯</button>
-      <button v-else type="submit" class="btn btn-dark btn-lg btn-block" @click="addVenue">新增</button>
-    </form>
-    <!-- 編輯確認modal -->
-    <div v-if="showEditModal" class="modal" tabindex="-1" role="dialog" style="display: block;">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">確認編輯</h5>
-            <button type="button" class="close" @click="showEditModal = false" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
+    <!-- 編輯確認 Modal -->
+    <div 
+      v-if="showEditModal" 
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+      <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-4">
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-gray-900">確認編輯</h3>
+            <button 
+              @click="showEditModal = false"
+              class="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <span class="text-2xl">&times;</span>
             </button>
           </div>
-          <div class="modal-body">
-            <p>確定要編輯此項目嗎？</p>
+          <div class="mb-6">
+            <p class="text-gray-600">確定要編輯此場地資料嗎？</p>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-danger" @click="confirmEdit">確認編輯</button>
-            <button type="button" class="btn btn-secondary" @click="showEditModal = false">取消</button>
+          <div class="flex justify-end space-x-4">
+            <button 
+              @click="showEditModal = false"
+              class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              取消
+            </button>
+            <button 
+              @click="confirmEdit"
+              class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+            >
+              確認編輯
+            </button>
           </div>
         </div>
       </div>
     </div>
-
   </div>
 </template>
-
 
 <script>
 import { db } from '@/config/firebaseConfig';
@@ -58,6 +126,7 @@ import { addDoc, collection, getDoc, doc, setDoc } from 'firebase/firestore';
 
 export default {
   props: ['venueId'],
+  
   data() {
     return {
       venue: {
@@ -69,37 +138,40 @@ export default {
       actionIsEdit: this.venueId,
     };
   },
+  
   async mounted() {
     if (this.venueId) {
-      // 如果有 venueId，表示進入編輯模式，載入場地資料
       const docRef = doc(db, "venues", this.venueId);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         console.log(docSnap.data());
-        this.venue = docSnap.data(); // 直接填充到表單資料
+        this.venue = docSnap.data();
       } else {
         console.log("找不到該場地資料");
       }
     }
   },
+  
   methods: {
     async addVenue() {
       try {
-        // post 的 Firestore 儲存操作
         await addDoc(collection(db, "venues"), {
           venues_name: this.venue.venues_name,
           price_per_hour: this.venue.price_per_hour,
           capacity: this.venue.capacity,
         });
         console.log("場地資料已新增");
-
+        // 新增成功後跳轉到場地列表
+        this.$router.push("/manage/venue");
       } catch (error) {
         console.log(error);
       }
     },
+    
     openEditModal() {
       this.showEditModal = true;
     },
+    
     async confirmEdit() {
       console.log(this.venueId)
       if (this.venueId) {

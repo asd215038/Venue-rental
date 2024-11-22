@@ -1,8 +1,8 @@
 <template>
   <footer class="footer custom-footer">
-    <div class="container text-center">
+    <div class="text-center">
       <p>© 2024 Your Company Name. All rights reserved.</p>
-      <ul class="footer-links">
+      <ul class="footer-links" >
         <li><router-link to="/about">關於我們</router-link></li>
         <li><router-link to="/contact">聯絡我們</router-link></li>
         <li><router-link to="/privacy">隱私政策</router-link></li>
@@ -24,10 +24,6 @@ export default {
   color: white;
   padding: 20px 0;
   width: 100%;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  z-index: 100; /* Ensure it's above content if needed */
 }
 
 .footer-links {
