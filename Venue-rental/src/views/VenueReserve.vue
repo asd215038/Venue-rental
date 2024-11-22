@@ -475,6 +475,12 @@ export default {
 </script>
 
 <style scoped>
+/* 滾動條 */
+.max-h-72 {
+  max-height: 18rem;
+  overflow-y: auto;
+}
+
 /* 顏色與按鈕 */
 .bg-orange-400 {
   background-color: #f97316;

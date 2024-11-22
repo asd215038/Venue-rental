@@ -66,7 +66,7 @@
 
 <script>
 import { db } from '@/config/firebaseConfig';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 
 export default {
   data() {
