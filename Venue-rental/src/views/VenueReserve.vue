@@ -11,15 +11,16 @@
       <input
           type="date"
           v-model="selectedDate"
-          @change="updateWeekDays"
+          @change="fetchBookedSlots"
           class="flex-1 px-4 py-2 border rounded-lg"
+          :min="today"
       />
     </div>
 
     <!-- 課表 -->
     <div class="bg-white rounded-lg shadow-md p-4 mb-8 overflow-auto max-h-72">
       <div class="flex justify-between mb-4">
-        <h2 class="text-xl font-bold text-gray-800">一周預約課表</h2>
+        <h2 class="text-xl font-bold text-gray-800">場地預約</h2>
         <p class="text-sm text-gray-500">選擇日期: {{ formattedSelectedDate }}</p>
       </div>
 
@@ -43,20 +44,22 @@
               v-for="(day, index) in weekDays"
               :key="index"
               :class="{
-      'bg-orange-400': day.date === selectedDate,
-      'bg-gray-200': day.date !== selectedDate,
-    }"
+                'bg-orange-400': day.date === selectedDate,
+                'bg-gray-200': day.date !== selectedDate,
+              }"
               class="px-4 py-2 border text-center"
           >
             <button
                 @click="toggleSelection(day.dayName, hour, day.date)"
+                :disabled="isBooked(day.date, hour)"
                 :class="{
-          'bg-blue-500 text-white': isSelected(day.dayName, hour),
-          'bg-transparent': !isSelected(day.dayName, hour),
-        }"
+                  'bg-blue-500 text-white': isSelected(day.dayName, hour),
+                  'bg-gray-300': isBooked(day.date, hour),
+                  'bg-transparent': !isSelected(day.dayName, hour),
+                }"
                 class="w-full h-full border-none cursor-pointer"
             >
-              {{ isSelected(day.dayName, hour) ? '已選' : '預約' }}
+              {{ isBooked(day.date, hour) ? '已預約' : (isSelected(day.dayName, hour) ? '已選' : '預約') }}
             </button>
           </td>
         </tr>
@@ -71,13 +74,17 @@
         <ul>
           <li>場地: {{ selectedVenue }}</li>
           <li>日期: {{ today }}</li>
-          <li v-for="slot in selectedSlots" :key="slot.day + slot.hour" class="text-sm">
-            時段: {{ slot.date}} -{{ slot.day}}- {{ slot.hour }}:00 - {{ slot.hour + 1 }}:00 金額: NT$ {{ pricePerHour }}
+          <li
+              v-for="slot in selectedSlots"
+              :key="slot.day + slot.hour"
+              class="text-sm"
+          >
+            時段: {{ slot.date }} - {{ slot.day }} - {{ slot.hour }}:00 - {{ slot.hour + 1 }}:00 金額: NT$
+            {{ pricePerHour }}
           </li>
         </ul>
         <p class="text-xl font-semibold mt-4">總金額: NT$ {{ totalAmount }}</p>
       </div>
-
       <!-- 使用者條款 (保持不變) -->
       <div class="mb-4 max-h-64 overflow-auto">
         <h3 class="text-lg font-bold">使用者條款</h3>
@@ -91,7 +98,6 @@
           <li>7. 已完成繳費的訂單，如因故需取消或變更場地、時間，應於場地使用時間前四小時提出異動或取消。其餘詳細規範將依「場地使用規範」辦理，逾時恕不受理，感謝您的配合。</li>
         </ul>
       </div>
-
       <!-- 同意條款 -->
       <div class="flex items-center mb-4">
         <input type="checkbox" v-model="acceptedTerms" class="mr-2" />
@@ -111,6 +117,9 @@
 </template>
 
 <script>
+import { db } from "@/config/firebaseConfig";
+import { collection, query, where, getDocs } from "firebase/firestore";
+
 export default {
   data() {
     return {
@@ -120,6 +129,7 @@ export default {
       weekDays: [], // 動態生成的一周日期
       hours: Array.from({ length: 15 }, (_, i) => 8 + i), // 08:00 - 22:00 的時段
       selectedSlots: [], // 用戶選擇的時段
+      bookedSlots: {}, // 已被預約的時段
       acceptedTerms: false, // 是否同意條款
       pricePerHour: 300, // 每小時價格
       today: new Date().toISOString().split("T")[0], // 今天的日期
@@ -127,6 +137,7 @@ export default {
   },
   created() {
     this.updateWeekDays();
+    this.fetchBookedSlots();
   },
   computed: {
     totalAmount() {
@@ -134,8 +145,13 @@ export default {
     },
     formattedSelectedDate() {
       const date = new Date(this.selectedDate);
-      return date.toLocaleDateString("zh-TW", { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' });
-    }
+      return date.toLocaleDateString("zh-TW", {
+        weekday: "long",
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+      });
+    },
   },
   methods: {
     // 更新一周的日期
@@ -148,9 +164,33 @@ export default {
         date.setDate(selectedDateObj.getDate() + index - selectedDateObj.getDay());
         return {
           dayName: dayName,
-          date: date.toISOString().split("T")[0]
+          date: date.toISOString().split("T")[0],
         };
       });
+    },
+    // 從 Firebase 獲取已預約的時段
+    async fetchBookedSlots() {
+      if (!this.selectedVenue) return;
+      const venueRef = collection(db, "reservations");
+      const q = query(
+          venueRef,
+          where("venue", "==", this.selectedVenue),
+          where("date", "==", this.selectedDate)
+      );
+      const querySnapshot = await getDocs(q);
+
+      const slots = {};
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const key = `${data.date}-${data.hour}`;
+        slots[key] = true;
+      });
+      this.bookedSlots = slots;
+    },
+    // 檢查時段是否已被預約
+    isBooked(date, hour) {
+      const key = `${date}-${hour}`;
+      return this.bookedSlots[key] || false;
     },
     // 切換時段選擇
     toggleSelection(day, hour, date) {
@@ -172,25 +212,23 @@ export default {
     },
     // 提交訂單
     submitOrder() {
-      if (!this.acceptedTerms) return; // 若未同意條款則不提交
+      if (!this.acceptedTerms) return;
       console.log("訂單已提交:", this.selectedSlots);
     },
   },
   watch: {
     selectedDate() {
       this.updateWeekDays();
-    }
-  }
+      this.fetchBookedSlots();
+    },
+    selectedVenue() {
+      this.fetchBookedSlots();
+    },
+  },
 };
 </script>
 
 <style scoped>
-/* 滾動條 */
-.max-h-72 {
-  max-height: 18rem;
-  overflow-y: auto;
-}
-
 /* 顏色與按鈕 */
 .bg-orange-400 {
   background-color: #f97316;
@@ -198,10 +236,6 @@ export default {
 
 .bg-blue-500 {
   background-color: #3b82f6;
-}
-
-.text-blue-500 {
-  color: #3b82f6;
 }
 
 button:disabled {
