@@ -10,10 +10,11 @@ import { fab } from '@fortawesome/free-brands-svg-icons';
 import './index.css'
 
 library.add(fas, far, fab);
+
 const app = createApp(App)
 
-app.use(router).use(store)
+store.dispatch('initAuth'); // 初始化 Firebase 登入監聽
 
+app.use(router).use(store)
 app.component('font-awesome-icon', FontAwesomeIcon);
 app.mount('#app')
-

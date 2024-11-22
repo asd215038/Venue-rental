@@ -1,11 +1,6 @@
 import { createStore } from 'vuex'
 import { firebaseAuth } from '@/config/firebaseConfig';
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signOut,
-  updateProfile 
-} from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, onAuthStateChanged } from 'firebase/auth';
 
 export default createStore({
   state: {
@@ -17,7 +12,10 @@ export default createStore({
   },
   getters: {
     user(state) {
-      return state.user
+      return state.user;
+    },
+    isLoggedIn(state) {
+      return state.user.loggedIn;
     }
   },
   mutations: {
@@ -30,57 +28,63 @@ export default createStore({
     SET_USER_EMAIL(state, email) {
       state.user.email = email;
     }
-
   },
   actions: {
     async register(context, {email, password, name}) {
-      const response = await createUserWithEmailAndPassword(firebaseAuth, email, password)
-      if (response) {
-        await updateProfile(response.user, {
-          displayName: name
-        })
-        context.commit('SET_USER_DISPLAYNAME', response.user.displayName)
-        context.commit('SET_USER_EMAIL', response.user.email)
-        context.commit('SET_LOGGED_IN', true)
-        console.log(name)
-      } else {
-        throw new Error('Unable to register user')
+      try {
+        const response = await createUserWithEmailAndPassword(firebaseAuth, email, password);
+        if (response) {
+          await updateProfile(response.user, { displayName: name });
+          context.commit('SET_USER_DISPLAYNAME', response.user.displayName);
+          context.commit('SET_USER_EMAIL', response.user.email);
+          context.commit('SET_LOGGED_IN', true);
+        } else {
+          throw new Error('Unable to register user');
+        }
+      } catch (error) {
+        console.error(error);
       }
     },
 
     async logIn(context, {email, password}) {
-      const response = await signInWithEmailAndPassword(firebaseAuth, email, password)
-      if (response) {
-        context.commit('SET_USER_DISPLAYNAME', response.user.displayName)
-        context.commit('SET_USER_EMAIL', response.user.email)
-        context.commit('SET_LOGGED_IN', true)
-        console.log(response.user)
-      } else {
-        throw new Error('login failed')
+      try {
+        const response = await signInWithEmailAndPassword(firebaseAuth, email, password);
+        if (response) {
+          context.commit('SET_USER_DISPLAYNAME', response.user.displayName);
+          context.commit('SET_USER_EMAIL', response.user.email);
+          context.commit('SET_LOGGED_IN', true);
+        } else {
+          throw new Error('Login failed');
+        }
+      } catch (error) {
+        console.error(error);
       }
     },
 
     async logOut(context) {
-      await signOut(firebaseAuth)
-      context.commit('SET_USER_DISPLAYNAME', null)
-      context.commit('SET_USER_EMAIL', null)
-      context.commit('SET_LOGGED_IN', false)
-    }, catch(error) {
-      console.error(error)
-    }
+      try {
+        await signOut(firebaseAuth);
+        context.commit('SET_USER_DISPLAYNAME', null);
+        context.commit('SET_USER_EMAIL', null);
+        context.commit('SET_LOGGED_IN', false);
+      } catch (error) {
+        console.error(error);
+      }
+    },
 
-    // async fetchUser(context, user) {
-    //   context.commit("SET_LOGGED_IN", user !== null);
-    //   if (user) {
-    //     context.commit("SET_USER", {
-    //       displayName: user.displayName,
-    //       email: user.email
-    //     });
-    //   } else {
-    //     context.commit("SET_USER", null);
-    //   }
-    // }
+    initAuth({ commit }) {
+      onAuthStateChanged(firebaseAuth, (user) => {
+        if (user) {
+          commit('SET_USER_DISPLAYNAME', user.displayName);
+          commit('SET_USER_EMAIL', user.email);
+          commit('SET_LOGGED_IN', true);
+        } else {
+          commit('SET_USER_DISPLAYNAME', null);
+          commit('SET_USER_EMAIL', null);
+          commit('SET_LOGGED_IN', false);
+        }
+      });
+    }
   },
-  modules: {
-  }
+  modules: {}
 })
