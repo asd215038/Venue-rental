@@ -24,10 +24,6 @@ export default {
   color: white;
   padding: 20px 0;
   width: 100%;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  z-index: 100; /* Ensure it's above content if needed */
 }
 
 .footer-links {
