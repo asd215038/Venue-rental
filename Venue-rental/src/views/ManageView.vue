@@ -22,7 +22,7 @@
                 to="/manage/addVenue" 
                 class="text-gray-600 hover:text-blue-500 transition-colors"
               >
-                新增場地
+                最新消息
               </router-link>
             </div>
           </div>
