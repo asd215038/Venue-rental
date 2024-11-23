@@ -1,5 +1,8 @@
 <template>
   <div class="home">
+
+    <div style="margin: 50px;"></div>
+
     <Carousel></Carousel>
     
     <!-- 最新消息區塊 -->
