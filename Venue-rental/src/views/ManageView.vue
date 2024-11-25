@@ -19,10 +19,10 @@
                 場地管理
               </router-link>
               <router-link 
-                to="/manage/addVenue" 
+                to="/manage/news" 
                 class="text-gray-600 hover:text-blue-500 transition-colors"
               >
-                最新消息
+                公告管理
               </router-link>
             </div>
           </div>
