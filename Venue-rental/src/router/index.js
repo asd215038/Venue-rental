@@ -25,6 +25,7 @@ const router = createRouter({
     { path: "/manage/venue/edit/:venueId?", name: 'EditVenue',component: addVenue, props:true},
     { path: "/manage/news", component: NewsView},
     { path: "/manage/news/add", component: addNews},
+    { path: "/manage/news/edit/:newsId?", name: 'EditNews',component: addNews, props:true},
   ]
 })
 
