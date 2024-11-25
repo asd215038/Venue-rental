@@ -45,11 +45,11 @@
                         取消
                     </button>
                     <button v-if="actionIsEdit" type="submit" @click="openEditModal"
-                        class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                        class="px-6 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors">
                         確認編輯
                     </button>
                     <button v-else type="submit" @click="addNews"
-                        class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                        class="px-6 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors">
                         新增公告
                     </button>
                 </div>
@@ -76,7 +76,7 @@
                             取消
                         </button>
                         <button @click="confirmEdit"
-                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                            class="px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors">
                             確認編輯
                         </button>
                     </div>
