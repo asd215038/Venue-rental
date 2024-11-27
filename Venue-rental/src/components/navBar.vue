@@ -1,19 +1,21 @@
 <template>
   <nav class="bg-[#39B3E3] p-4 text-bg text-white">
-    <div class="container mx-auto flex flex-wrap items-center">
+    <div class=" flex flex-wrap items-center grid grid-cols-10 gap-4">
       <!-- Logo and Brand -->
-      <div class="flex items-center">
-        <font-awesome-icon 
-          :icon="['fas', 'person-running']" 
-          class="text-yellow-400 mr-5 text-2xl"
-        />
-        <router-link 
-          to="/" 
-          class="text-white text-lg font-semibold"
-        >
-          Playground
-        </router-link>
-      </div>
+       <div class="col-span-2 flex justify-end">
+         <div class="flex items-center">
+           <font-awesome-icon 
+             :icon="['fas', 'person-running']" 
+             class="text-yellow-400 mr-5 text-2xl"
+           />
+           <router-link 
+             to="/" 
+             class="text-white text-lg font-semibold"
+           >
+             Playground
+           </router-link>
+         </div>
+       </div>
 
       <!-- Mobile Menu Button -->
       <button 
@@ -33,9 +35,9 @@
       <!-- Navigation Links -->
       <div 
         :class="[isOpen ? 'block' : 'hidden', 'lg:flex lg:items-center w-full lg:w-auto']"
-        class="mt-4 ml-6 lg:mt-0"
+        class="mt-4 ml-2 lg:mt-0 col-span-6"
       >
-        <ul class="lg:flex space-y-2 lg:space-y-0 lg:space-x-1 pr-72" >
+        <ul class="lg:flex space-y-2 lg:space-y-0 lg:space-x-1" >
           <li>
             <router-link 
               to="/" 
@@ -74,35 +76,35 @@
           </li>
         </ul>
 
-        <!-- Auth Buttons -->
-        <div class="lg:ml-4 mt-4 lg:mt-0 flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-2">
-          <router-link 
-            to="/" 
-            class="px-4 py-2 text-white hover:text-yellow-300 transition duration-150"
-          >
-            首頁
-          </router-link>
-          
-          <div v-if="isLoggedIn" class="flex items-center px-4">
-            <p class="text-white">{{ user.displayName }}</p>
-          </div>
-          
-          <router-link 
-            v-if="isLoggedIn" 
-            to="logout" 
-            class="px-4 py-2 text-white hover:text-yellow-300 transition duration-150"
-          >
-            登出
-          </router-link>
-          
-          <router-link 
-            v-else 
-            to="/login" 
-            class="px-4 py-2 text-white hover:text-yellow-300 transition duration-150"
-          >
-            登入 / 註冊
-          </router-link>
+      </div>
+      <!-- Auth Buttons -->
+      <div class="lg:ml-4 mt-4 lg:mt-0 flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-2 col-span-2">
+        <router-link 
+          to="/" 
+          class="px-4 py-2 text-white hover:text-yellow-300 transition duration-150"
+        >
+          首頁
+        </router-link>
+        
+        <div v-if="isLoggedIn" class="flex items-center px-4">
+          <p class="text-white">{{ user.displayName }}</p>
         </div>
+        
+        <router-link 
+          v-if="isLoggedIn" 
+          to="logout" 
+          class="px-4 py-2 text-white hover:text-yellow-300 transition duration-150"
+        >
+          登出
+        </router-link>
+        
+        <router-link 
+          v-else 
+          to="/login" 
+          class="px-4 py-2 text-white hover:text-yellow-300 transition duration-150"
+        >
+          登入 / 註冊
+        </router-link>
       </div>
     </div>
   </nav>
