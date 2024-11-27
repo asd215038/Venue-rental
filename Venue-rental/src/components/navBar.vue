@@ -18,16 +18,16 @@
        </div>
 
       <!-- Mobile Menu Button -->
-      <button 
-        class="lg:hidden block text-white hover:text-yellow-300 focus:outline-none"
-        @click="isOpen = !isOpen"
+      <button
+          class="lg:hidden block text-white hover:text-yellow-300 focus:outline-none"
+          @click="isOpen = !isOpen"
       >
         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path 
-            stroke-linecap="round" 
-            stroke-linejoin="round" 
-            stroke-width="2" 
-            d="M4 6h16M4 12h16m-16 6h16"
+          <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16m-16 6h16"
           />
         </svg>
       </button>
@@ -39,37 +39,37 @@
       >
         <ul class="lg:flex space-y-2 lg:space-y-0 lg:space-x-1" >
           <li>
-            <router-link 
-              to="/" 
-              class="block px-1 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
-              active-class="font-bold underline"
+            <router-link
+                to="/reserve"
+                class="block px-1 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
+                active-class="font-bold underline"
             >
               場地租借
             </router-link>
           </li>
           <li>
-            <router-link 
-              to="/" 
-              class="block px-1 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
-              active-class="font-bold underline"
+            <router-link
+                to="/venue"
+                class="block px-1 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
+                active-class="font-bold underline"
             >
               場地查詢
             </router-link>
           </li>
           <li>
-            <router-link 
-              to="/" 
-              class="block px-1 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
-              active-class="font-bold underline"
+            <router-link
+                to="/"
+                class="block px-1 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
+                active-class="font-bold underline"
             >
               訂單查詢
             </router-link>
           </li>
           <li>
-            <router-link 
-              to="/manage" 
-              class="block px-1 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
-              active-class="font-bold underline"
+            <router-link
+                to="/manage"
+                class="block px-1 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
+                active-class="font-bold underline"
             >
               後臺管理
             </router-link>
@@ -111,25 +111,25 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { computed } from 'vue'
+import { mapGetters } from 'vuex'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 export default {
   components: {
     FontAwesomeIcon
   },
-  setup() {
-    const isOpen = ref(false)
+  data() {
     return {
-      isOpen
+      isOpen: false
     }
   },
   computed: {
-    user() {
-      return this.$store.state.user
-    },
-    isLoggedIn() {
-      return this.$store.state.user.loggedIn
+    ...mapGetters(['isLoggedIn', 'user']),
+  },
+  methods: {
+    logout() {
+      this.$store.dispatch('logOut');
     }
   }
 }

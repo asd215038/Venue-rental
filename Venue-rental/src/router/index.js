@@ -10,6 +10,8 @@ import VenueManage from '../views/venue/VenueManage.vue'
 import NewsView from '../views/news/NewsView.vue'
 import addNews from '../views/news/addNews.vue'
 
+import Venuebrowse from "@/views/Venuebrowse.vue";
+import VenueReserve  from "@/views/VenueReserve.vue";
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -17,6 +19,9 @@ const router = createRouter({
     { path: "/login", component: userLogin },
     { path: "/register", component: userRegister },
     { path: "/logout", component: userLogout },
+    {path: "/venue", component: Venuebrowse},
+    {path:"/reserve", component: VenueReserve},
+
     // 後臺管理
     { path: "/manage", component: manage },
     { path: "/manage/user", component: UserManageVIew },
