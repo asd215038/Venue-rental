@@ -7,6 +7,8 @@ import UserManageVIew from '../views/UserManageVIew.vue'
 import addVenue from '../views/venue/addVenue.vue'
 import manage from '../views/ManageView.vue'
 import VenueManage from '../views/venue/VenueManage.vue'
+import NewsView from '../views/news/NewsView.vue'
+import addNews from '../views/news/addNews.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -21,6 +23,9 @@ const router = createRouter({
     { path: "/manage/venue", component: VenueManage },
     { path: "/manage/venue/add", component: addVenue },
     { path: "/manage/venue/edit/:venueId?", name: 'EditVenue',component: addVenue, props:true},
+    { path: "/manage/news", component: NewsView},
+    { path: "/manage/news/add", component: addNews},
+    { path: "/manage/news/edit/:newsId?", name: 'EditNews',component: addNews, props:true},
   ]
 })
 
