@@ -8,7 +8,8 @@ export default createStore({
       loggedIn: false,
       displayName: null,
       email: null
-    }
+    },
+    selectedVenueName: '',
   },
   getters: {
     user(state) {
@@ -27,7 +28,13 @@ export default createStore({
     },
     SET_USER_EMAIL(state, email) {
       state.user.email = email;
-    }
+    },
+    SET_VENUE_NAME(state, venueName) {  // 新增 mutation
+      state.selectedVenueName = venueName;
+    },
+    CLEAN_VENUE_NAME(state) {  // 新增 mutation
+      state.selectedVenueName = '';
+    },
   },
   actions: {
     async register(context, {email, password, name}) {
@@ -84,7 +91,14 @@ export default createStore({
           commit('SET_LOGGED_IN', false);
         }
       });
-    }
+    },
+    //預約時 紀錄選取到的場地 
+    setVenueName({ commit }, venueName) {  // 新增 action
+      commit('SET_VENUE_NAME', venueName);
+    },
+    cleanVenueName({ commit }) {  // 新增 action
+      commit('CLEAN_VENUE_NAME');
+    },
   },
   modules: {}
 })

@@ -3,18 +3,13 @@
     <!-- 篩選器 -->
     <div class="bg-white rounded-lg shadow-md p-4 mb-8 flex flex-wrap items-center gap-4">
       <select v-model="selectedVenue" class="flex-1 px-4 py-2 border rounded-lg">
-        <option value="">選擇場地</option>
+        <option value="">{{ venueName || '選擇場地' }}</option>
         <option v-for="category in categories" :key="category" :value="category">
           {{ category }}
         </option>
       </select>
-      <input
-          type="date"
-          v-model="selectedDate"
-          @change="fetchBookedSlots"
-          class="flex-1 px-4 py-2 border rounded-lg"
-          :min="today"
-      />
+      <input type="date" v-model="selectedDate" @change="fetchBookedSlots" class="flex-1 px-4 py-2 border rounded-lg"
+        :min="today" />
     </div>
 
     <!-- 課表 -->
@@ -26,43 +21,29 @@
 
       <table class="table-auto w-full">
         <thead>
-        <tr>
-          <th class="px-4 py-2 border">時間</th>
-          <th
-              v-for="(day, index) in weekDays"
-              :key="index"
-              class="px-4 py-2 border text-center"
-          >
-            {{ day.dayName }}
-          </th>
-        </tr>
+          <tr>
+            <th class="px-4 py-2 border">時間</th>
+            <th v-for="(day, index) in weekDays" :key="index" class="px-4 py-2 border text-center">
+              {{ day.dayName }}
+            </th>
+          </tr>
         </thead>
         <tbody>
-        <tr v-for="hour in hours" :key="hour">
-          <td class="px-4 py-2 border text-center">{{ hour }}:00 - {{ hour + 1 }}:00</td>
-          <td
-              v-for="(day, index) in weekDays"
-              :key="index"
-              :class="{
-                'bg-orange-400': day.date === selectedDate,
-                'bg-gray-200': day.date !== selectedDate,
-              }"
-              class="px-4 py-2 border text-center"
-          >
-            <button
-                @click="toggleSelection(day.dayName, hour, day.date)"
-                :disabled="isBooked(day.date, hour)"
-                :class="{
-                  'bg-blue-500 text-white': isSelected(day.dayName, hour),
-                  'bg-gray-300': isBooked(day.date, hour),
-                  'bg-transparent': !isSelected(day.dayName, hour),
-                }"
-                class="w-full h-full border-none cursor-pointer"
-            >
-              {{ isBooked(day.date, hour) ? '已預約' : (isSelected(day.dayName, hour) ? '已選' : '預約') }}
-            </button>
-          </td>
-        </tr>
+          <tr v-for="hour in hours" :key="hour">
+            <td class="px-4 py-2 border text-center">{{ hour }}:00 - {{ hour + 1 }}:00</td>
+            <td v-for="(day, index) in weekDays" :key="index" :class="{
+              'bg-orange-400': day.date === selectedDate,
+              'bg-gray-200': day.date !== selectedDate,
+            }" class="px-4 py-2 border text-center">
+              <button @click="toggleSelection(day.dayName, hour, day.date)" :disabled="isBooked(day.date, hour)" :class="{
+                'bg-blue-500 text-white': isSelected(day.dayName, hour),
+                'bg-gray-300': isBooked(day.date, hour),
+                'bg-transparent': !isSelected(day.dayName, hour),
+              }" class="w-full h-full border-none cursor-pointer">
+                {{ isBooked(day.date, hour) ? '已預約' : (isSelected(day.dayName, hour) ? '已選' : '預約') }}
+              </button>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -74,11 +55,7 @@
         <ul>
           <li>場地: {{ selectedVenue }}</li>
           <li>日期: {{ today }}</li>
-          <li
-              v-for="slot in selectedSlots"
-              :key="slot.day + slot.hour"
-              class="text-sm"
-          >
+          <li v-for="slot in selectedSlots" :key="slot.day + slot.hour" class="text-sm">
             時段: {{ slot.date }} - {{ slot.day }} - {{ slot.hour }}:00 - {{ slot.hour + 1 }}:00 金額: NT$
             {{ pricePerHour }}
           </li>
@@ -105,19 +82,20 @@
       </div>
 
       <!-- 確認按鈕 -->
-      <button
-          @click="submitOrder"
-          :disabled="!acceptedTerms"
-          class="px-6 py-3 bg-blue-500 text-white rounded-lg disabled:opacity-50"
-      >
+      <button @click="submitOrder" :disabled="!acceptedTerms"
+        class="px-6 py-3 bg-blue-500 text-white rounded-lg disabled:opacity-50">
         確認預約
       </button>
+    </div>
+    <div>
+      {{ this.$store.state.selectedVenueName }}
     </div>
   </div>
 </template>
 
 <script>
 import { db } from "@/config/firebaseConfig";
+import store from "@/store";
 import { collection, query, where, getDocs } from "firebase/firestore";
 
 export default {
@@ -152,19 +130,31 @@ export default {
         day: "numeric",
       });
     },
+    venueName() {
+      return this.$store.state.selectedVenueName;
+    },
+  },
+  beforeRouteLeave(to, from, next) {
+    // 清除場地狀態
+    this.$store.dispatch('cleanVenueName');
+    next();
   },
   methods: {
     // 更新一周的日期
     updateWeekDays() {
-      const selectedDateObj = new Date(this.selectedDate);
-      const weekDaysArray = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+      const today = new Date();
 
-      this.weekDays = weekDaysArray.map((dayName, index) => {
-        const date = new Date(selectedDateObj);
-        date.setDate(selectedDateObj.getDate() + index - selectedDateObj.getDay());
+      this.weekDays = Array.from({ length: 7 }, (_, index) => {
+        const date = new Date(today);
+        date.setDate(today.getDate() + index);
+
         return {
-          dayName: dayName,
-          date: date.toISOString().split("T")[0],
+          dayName: date.toLocaleDateString('zh-TW', {
+            month: 'numeric',
+            day: 'numeric',
+            weekday: 'short'
+          }),
+          date: date.toISOString().split('T')[0]
         };
       });
     },
@@ -173,9 +163,9 @@ export default {
       if (!this.selectedVenue) return;
       const venueRef = collection(db, "reservations");
       const q = query(
-          venueRef,
-          where("venue", "==", this.selectedVenue),
-          where("date", "==", this.selectedDate)
+        venueRef,
+        where("venue", "==", this.selectedVenue),
+        where("date", "==", this.selectedDate)
       );
       const querySnapshot = await getDocs(q);
 
@@ -196,7 +186,7 @@ export default {
     toggleSelection(day, hour, date) {
       const slot = { day, hour, date };
       const index = this.selectedSlots.findIndex(
-          (slot) => slot.day === day && slot.hour === hour
+        (slot) => slot.day === day && slot.hour === hour
       );
       if (index === -1) {
         this.selectedSlots.push(slot);
@@ -207,7 +197,7 @@ export default {
     // 檢查時段是否已選
     isSelected(day, hour) {
       return this.selectedSlots.some(
-          (slot) => slot.day === day && slot.hour === hour
+        (slot) => slot.day === day && slot.hour === hour
       );
     },
     // 提交訂單
