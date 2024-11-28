@@ -141,6 +141,18 @@
         確認預約
       </button>
     </div>
+    <!-- 確認選擇場地Modal -->
+    <div v-if="showModal" class="fixed inset-0 flex items-center justify-center z-50">
+      <div class="fixed inset-0 bg-black opacity-50" @click="closeModal"></div>
+      <div class="bg-white rounded-lg p-8 z-10 max-w-md w-full mx-4">
+        <h3 class="text-xl font-bold text-gray-800 mb-4">提示</h3>
+        <p class="text-gray-600 mb-6">請先選擇場地後再進行預約。</p>
+        <button @click="closeModal"
+          class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+          了解
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -152,6 +164,7 @@ import { collection, query, where, getDocs, setDoc, doc, orderBy } from "firebas
 export default {
   data() {
     return {
+      showModal: false,
       categories: [], // 場地類型
       selectedVenue: "", // 選擇的場地
       selectedDate: new Date().toISOString().split("T")[0], // 默認為今天
@@ -165,9 +178,8 @@ export default {
       q: [],
     };
   },
-  created() {
-    this.updateWeekDays();
-    this.fetchBookedSlots();
+  async created() {
+    await this.initializeComponent();
   },
   computed: {
     totalAmount() {
@@ -192,6 +204,36 @@ export default {
     next();
   },
   methods: {
+    async initializeComponent() {
+      await this.fetchVenues();
+      this.updateWeekDays();
+
+      // 初始化時設置從 store 來的場地
+      const venueFromStore = this.$store.state.selectedVenueName;
+      if (venueFromStore) {
+        this.selectedVenue = venueFromStore;
+        await this.fetchBookedSlots();
+      }
+    },
+    closeModal() {
+      this.showModal = false;
+    },
+    // 修改切換時段選擇方法
+    toggleSelection(day, hour, date) {
+      if (!this.selectedVenue) {
+        this.showModal = true;
+        return;
+      }
+      const slot = { day, hour, date };
+      const index = this.selectedSlots.findIndex(
+        (slot) => slot.day === day && slot.hour === hour
+      );
+      if (index === -1) {
+        this.selectedSlots.push(slot);
+      } else {
+        this.selectedSlots.splice(index, 1);
+      }
+    },
     // 更新一周的日期
     updateWeekDays() {
       const today = new Date();
@@ -211,71 +253,70 @@ export default {
       });
     },
     // 獲取場地列表
-  async fetchVenues() {
-    try {
-      const venuesRef = collection(db, "venues");
-      const querySnapshot = await getDocs(venuesRef);
-      
-      const venuesList = [];
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        if (data.venues_name) {
-          venuesList.push(data.venues_name);
-        }
-      });
-      
-      this.categories = venuesList;
-      console.log("場地列表:", this.categories);
-    } catch (error) {
-      console.error("獲取場地列表時發生錯誤:", error);
-    }
-  },
+    async fetchVenues() {
+      try {
+        const venuesRef = collection(db, "venues");
+        const querySnapshot = await getDocs(venuesRef);
+
+        const venuesList = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.venues_name) {
+            venuesList.push(data.venues_name);
+          }
+        });
+
+        this.categories = venuesList;
+        console.log("場地列表:", this.categories);
+      } catch (error) {
+        console.error("獲取場地列表時發生錯誤:", error);
+      }
+    },
     // 從 Firebase 獲取已預約的時段
     async fetchBookedSlots() {
-      if (this.selectedVenue === "選擇場地") {
-        console.log("尚未選擇場地");
+      if (!this.selectedVenue) {
+        this.bookedSlots = {};
         return;
       }
       try {
         const venueRef = collection(db, "reservations");
-        // 只使用一個 orderBy
-        const q = query(venueRef,
-          orderBy('reserve_date', 'asc')  // 只按照日期排序
-        );
-
-        const querySnapshot = await getDocs(q);
+        // 獲取所有預約記錄
+        const querySnapshot = await getDocs(venueRef);
         console.log("總共找到", querySnapshot.size, "筆預約紀錄");
 
-        // 建立一個整理後的資料結構
         const organizedBookings = {};
 
-        // 整理資料
+        // 在 JavaScript 中進行資料過濾和整理
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          const { reserve_date, reserve_time } = data;
+          // 只處理當前選擇的場地
+          if (data.reserve_venue === this.selectedVenue) {
+            const { reserve_date, reserve_time } = data;
 
-          if (!organizedBookings[reserve_date]) {
-            organizedBookings[reserve_date] = [];
+            // 檢查日期是否在當前週範圍內
+            if (reserve_date >= this.weekDays[0].date &&
+              reserve_date <= this.weekDays[6].date) {
+              if (!organizedBookings[reserve_date]) {
+                organizedBookings[reserve_date] = new Set(); // 使用 Set 避免重複
+              }
+              organizedBookings[reserve_date].add(reserve_time);
+            }
           }
-
-          organizedBookings[reserve_date].push(reserve_time);
-
-          // 對每個日期的時間進行排序
-          organizedBookings[reserve_date].sort((a, b) => parseInt(a) - parseInt(b));
         });
-
-        console.log("整理後的預約資料:", organizedBookings);
 
         // 將整理後的資料存入 bookedSlots
         const slots = {};
-        Object.entries(organizedBookings).forEach(([date, times]) => {
-          times.forEach(time => {
+        Object.entries(organizedBookings).forEach(([date, timeSet]) => {
+          // 將 Set 轉為陣列並排序
+          const sortedTimes = Array.from(timeSet).sort((a, b) => parseInt(a) - parseInt(b));
+          sortedTimes.forEach(time => {
             const key = `${date}-${time}`;
             slots[key] = true;
           });
         });
 
         this.bookedSlots = slots;
+        console.log(`${this.selectedVenue} 的預約狀態:`, this.bookedSlots);
 
       } catch (error) {
         console.error("獲取預約資料時發生錯誤:", error);
@@ -285,18 +326,6 @@ export default {
     isBooked(date, hour) {
       const key = `${date}-${hour.toString()}`;
       return this.bookedSlots[key] || false;
-    },
-    // 切換時段選擇
-    toggleSelection(day, hour, date) {
-      const slot = { day, hour, date };
-      const index = this.selectedSlots.findIndex(
-        (slot) => slot.day === day && slot.hour === hour
-      );
-      if (index === -1) {
-        this.selectedSlots.push(slot);
-      } else {
-        this.selectedSlots.splice(index, 1);
-      }
     },
     // 檢查時段是否已選
     isSelected(day, hour) {
@@ -355,13 +384,37 @@ export default {
     },
   },
   watch: {
+    // 監聽場地查詢頁面vuex傳入場地
+    '$store.state.selectedVenueName': {
+      immediate: true,
+      handler(newVenue) {
+        if (newVenue && newVenue !== this.selectedVenue) {
+          this.selectedVenue = newVenue;
+          this.fetchBookedSlots();
+        }
+      }
+    },
+    selectedVenue: {
+      immediate: true,
+      handler(newVenue) {
+        console.log('場地變更:', newVenue);
+        this.selectedSlots = []; // 清空已選擇的時段
+        if (newVenue) {
+          // 確保在選擇場地後立即更新預約狀態
+          this.$nextTick(() => {
+            this.fetchBookedSlots();
+          });
+        } else {
+          this.bookedSlots = {};
+        }
+      }
+    },
     selectedDate() {
       this.updateWeekDays();
-      this.fetchBookedSlots();
-    },
-    selectedVenue() {
-      this.fetchBookedSlots();
-    },
+      if (this.selectedVenue) {
+        this.fetchBookedSlots();
+      }
+    }
   },
 };
 </script>
@@ -377,6 +430,25 @@ export default {
 }
 
 button:disabled {
+  opacity: 0.5;
+}
+
+.fixed {
+  position: fixed;
+}
+
+.inset-0 {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.z-50 {
+  z-index: 50;
+}
+
+.opacity-50 {
   opacity: 0.5;
 }
 </style>
