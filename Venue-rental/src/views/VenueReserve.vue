@@ -236,7 +236,7 @@ export default {
     },
     // 更新一周的日期
     updateWeekDays() {
-      const today = new Date();
+      const today = new Date(this.selectedDate);  // 使用 selectedDate 而不是 today
 
       this.weekDays = Array.from({ length: 7 }, (_, index) => {
         const date = new Date(today);
@@ -252,6 +252,7 @@ export default {
         };
       });
     },
+
     // 獲取場地列表
     async fetchVenues() {
       try {
