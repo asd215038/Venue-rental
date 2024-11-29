@@ -42,6 +42,17 @@
               placeholder="請輸入容納人數" />
           </div>
         </div>
+        <!-- 場地類別 -->
+        <div class="form-group mb-6">
+          <label class="block text-gray-700 text-sm font-bold mb-2">
+            場地類別
+          </label>
+          <select v-model="venue.category"
+            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">請選擇場地類別</option>
+            <option value="籃球場">籃球場</option>
+            <option value="羽球場">羽球場</option>
+          </select>
 
         <!-- 提交按鈕 -->
         <div class="flex justify-end space-x-4">
@@ -58,8 +69,10 @@
             新增場地
           </button>
         </div>
+ </div>
       </form>
     </div>
+
 
     <!-- 編輯確認 Modal -->
     <div v-if="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -103,6 +116,7 @@ export default {
         venues_name: "",
         price_per_hour: "",
         capacity: "",
+        category: "",
       },
       showEditModal: false,
       actionIsEdit: this.venueId,
@@ -139,6 +153,7 @@ export default {
           venues_name: this.venue.venues_name,
           price_per_hour: this.venue.price_per_hour,
           capacity: this.venue.capacity,
+          category: this.venue.category,
         });
 
         console.log("場地資料已新增");
