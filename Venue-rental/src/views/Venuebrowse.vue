@@ -12,12 +12,25 @@
       <input type="time" v-model="selectedTime" class="flex-1 px-4 py-2 border rounded-lg" />
       <input type="number" v-model="selectedCapacity" placeholder="容納人數" class="flex-1 px-4 py-2 border rounded-lg" />
       <input type="text" v-model="searchKeyword" placeholder="搜尋關鍵字" class="flex-1 px-4 py-2 border rounded-lg" />
+      <button @click="resetFilters" class="px-4 py-2 bg-gray-200 rounded-lg">
+        重置篩選
+      </button>
+    </div>
+
+    <!-- 載入狀態 -->
+    <div v-if="isLoading" class="text-center py-8">
+      載入中...
+    </div>
+
+    <!-- 無結果狀態 -->
+    <div v-else-if="displayVenues.length === 0" class="text-center py-8">
+      查無符合條件的場地
     </div>
 
     <!-- 場地卡片 -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      <div v-for="venue in venues" :key="venue.venueId"
-        class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col cursor-pointer" @click="openModal(venue)">
+    <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div v-for="venue in displayVenues" :key="venue.venueId"
+           class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col cursor-pointer" @click="openModal(venue)">
         <img :src="venue.imageUrl" alt="場地圖片" class="h-48 w-full object-cover" />
         <div class="p-4 flex-1 flex flex-col">
           <h3 class="text-lg font-bold text-gray-800 mb-2">{{ venue.venues_name }}</h3>
@@ -28,8 +41,9 @@
       </div>
     </div>
 
+    <!-- 場地詳細資訊模態框 -->
     <div v-if="isModalOpen && selectedVenue"
-      class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+         class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div class="bg-white rounded-lg p-6 max-w-lg w-full">
         <h3 class="text-lg font-bold text-gray-800 mb-2">{{ selectedVenue.venues_name }}</h3>
         <img :src="selectedVenue.imageUrl" alt="場地圖片" class="h-48 w-full object-cover mb-4" />
@@ -52,82 +66,173 @@
 
 <script>
 import { db } from '@/config/firebaseConfig';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 
 export default {
-  data() {
-    return {
-      venues: [],
-      categories: ["籃球場", "足球場", "羽球場"], // 示例類別
-      selectedCategory: "",
-      selectedDate: "",
-      selectedTime: "",
-      selectedCapacity: "",
-      searchKeyword: "",
-      isModalOpen: false,  // 模態框的開關狀態
-      selectedVenue: null, // 被選中的場地
-    };
-  },
-  computed: {
-    filteredVenues() {
-      return this.venues.filter((venue) => {
-        const matchesCategory = this.selectedCategory
-          ? venue.category === this.selectedCategory
-          : true;
-        const matchesDateAndTime = this.selectedDate
-          ? venue.availableDates.some(
-            (d) =>
-              d.date === this.selectedDate &&
-              (!this.selectedTime || d.timeSlots.includes(this.selectedTime))
-          )
-          : true;
-        const matchesCapacity = this.selectedCapacity
-          ? venue.capacity >= this.selectedCapacity
-          : true;
-        const matchesKeyword = this.searchKeyword
-          ? venue.name.includes(this.searchKeyword) ||
-          venue.description.includes(this.searchKeyword)
-          : true;
+data() {
+return {
+// Venue-related data
+venues: [], // All venues from Firebase
+categories: [], // Unique venue categories
 
-        return matchesCategory && matchesDateAndTime && matchesCapacity && matchesKeyword;
-      });
-    },
-  },
+// Filter inputs
+selectedCategory: "",
+selectedDate: "",
+selectedTime: "",
+selectedCapacity: null,
+searchKeyword: "",
 
-  mounted() {
-    this.getVenues();
-  },
+// Filtered results and modal state
+filteredVenues: [],
+isModalOpen: false,
+selectedVenue: null,
 
-  methods: {
-    async getVenues() {
-      try {
-        const querySnapshot = await getDocs(collection(db, "venues"));
-        this.venues = querySnapshot.docs.map(doc => ({
-          venueId: doc.id,
-          ...doc.data()
-        }));
-      } catch (error) {
-        console.error("獲取場地資料時發生錯誤:", error);
-      }
-    },
-    openModal(venue) {
-      this.selectedVenue = venue;
-      this.isModalOpen = true;
-      // 將場地名稱存入 Vuex
-      this.$store.dispatch('setVenueName', venue.venues_name);
-    },
-    closeModal() {
-      this.isModalOpen = false;
-      this.selectedVenue = null;
-    },
-    goToBookingPage() {
-      this.$router.push('/reserve');
-      this.closeModal();
-    }
-  }
+// Additional state for better UX
+isLoading: false,
+noResultsFound: false
+};
+},
+
+computed: {
+// Determine which venues to display
+displayVenues() {
+// If filtered venues exist, show them
+// Otherwise, show all venues
+return this.filteredVenues.length > 0
+? this.filteredVenues
+: this.venues;
+}
+},
+
+watch: {
+// Watch all filter inputs and trigger filtering
+selectedCategory: 'filterVenues',
+selectedDate: 'filterVenues',
+selectedTime: 'filterVenues',
+selectedCapacity: 'filterVenues',
+searchKeyword: 'filterVenues',
+venues: {
+handler: 'filterVenues',
+immediate: true
+}
+},
+
+mounted() {
+this.fetchVenues();
+},
+
+methods: {
+async fetchVenues() {
+// Set loading state
+this.isLoading = true;
+
+try {
+// Fetch venues from Firestore
+const querySnapshot = await getDocs(collection(db, "venues"));
+
+// Transform firestore docs to array of venues
+const allVenues = querySnapshot.docs.map(doc => ({
+venueId: doc.id,
+...doc.data()
+}));
+
+// Update venues
+this.venues = allVenues;
+
+// Extract unique categories
+this.categories = [
+...new Set(allVenues.map(venue => venue.category).filter(Boolean))
+];
+
+// Initial filtering
+this.filterVenues();
+} catch (error) {
+console.error("Error fetching venues:", error);
+// Optionally show error message to user
+} finally {
+this.isLoading = false;
+}
+},
+
+filterVenues() {
+// Ensure venues are loaded
+if (!this.venues.length) return;
+
+// Filter venues based on multiple criteria
+this.filteredVenues = this.venues.filter(venue => {
+// Category filter
+const categoryMatch = !this.selectedCategory ||
+venue.category === this.selectedCategory;
+
+// Capacity filter (convert to number and handle null)
+const capacityMatch = !this.selectedCapacity ||
+venue.capacity >= Number(this.selectedCapacity);
+
+// Keyword filter (case-insensitive and handle undefined)
+const keywordMatch = !this.searchKeyword ||
+(venue.venues_name && venue.venues_name.toLowerCase().includes(this.searchKeyword.toLowerCase())) ||
+(venue.description && venue.description.toLowerCase().includes(this.searchKeyword.toLowerCase()));
+
+// Date and Time filter (more robust)
+const dateTimeMatch = !this.selectedDate ||
+(venue.availableDates &&
+venue.availableDates.some(
+availableDate =>
+availableDate.date === this.selectedDate &&
+(!this.selectedTime ||
+availableDate.timeSlots.includes(this.selectedTime))
+)
+);
+
+// Combine all filters
+return categoryMatch &&
+capacityMatch &&
+keywordMatch &&
+dateTimeMatch;
+});
+
+// Update no results flag
+this.noResultsFound = this.filteredVenues.length === 0;
+},
+
+openModal(venue) {
+this.selectedVenue = venue;
+this.isModalOpen = true;
+
+// Optional: Update Vuex store with selected venue name
+if (this.$store) {
+this.$store.dispatch('setVenueName', venue.venues_name);
+}
+},
+
+closeModal() {
+this.isModalOpen = false;
+this.selectedVenue = null;
+},
+
+goToBookingPage() {
+// Navigate to booking page
+this.$router.push({
+path: '/reserve',
+query: {
+venueId: this.selectedVenue.venueId,
+venueName: this.selectedVenue.venues_name
+}
+});
+this.closeModal();
+},
+
+// Reset all filters
+resetFilters() {
+this.selectedCategory = "";
+this.selectedDate = "";
+this.selectedTime = "";
+this.selectedCapacity = null;
+this.searchKeyword = "";
+}
+}
 };
 </script>
-
 <style scoped>
 /* 保持響應式設計 */
 .grid {
