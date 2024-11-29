@@ -150,6 +150,7 @@ export default {
     await this.fetchUserOrders();
   },
   methods: {
+    // 獲取當前登入使用者的訂單
     async fetchUserOrders() {
       const auth = getAuth();
       const currentUser = auth.currentUser;
