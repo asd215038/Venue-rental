@@ -173,7 +173,7 @@ export default {
       selectedSlots: [], // 用戶選擇的時段
       bookedSlots: {}, // 已被預約的時段
       acceptedTerms: false, // 是否同意條款
-      pricePerHour: 300, // 每小時價格
+      pricePerHour: 0, // 每小時價格
       today: new Date().toISOString().split("T")[0], // 今天的日期
       q: [],
       payment_status: false,
@@ -275,6 +275,22 @@ export default {
         console.error("獲取場地列表時發生錯誤:", error);
       }
     },
+
+    async fetchVenuePrice(venueName) {
+      try {
+        const venuesRef = collection(db, "venues");
+        const q = query(venuesRef, where("venues_name", "==", venueName));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          const venueData = querySnapshot.docs[0].data();
+          this.pricePerHour = venueData.price_per_hour;
+        }
+      } catch (error) {
+        console.error("獲取場地價格時發生錯誤:", error);
+      }
+    },
+
     // 從 Firebase 獲取已預約的時段
     async fetchBookedSlots() {
       if (!this.selectedVenue) {
@@ -401,16 +417,29 @@ export default {
     },
     selectedVenue: {
       immediate: true,
-      handler(newVenue) {
+      async handler(newVenue) {
         console.log('場地變更:', newVenue);
         this.selectedSlots = []; // 清空已選擇的時段
         if (newVenue) {
+          // 獲取新場地的價格
+          await this.fetchVenuePrice(newVenue);
           // 確保在選擇場地後立即更新預約狀態
           this.$nextTick(() => {
             this.fetchBookedSlots();
           });
         } else {
           this.bookedSlots = {};
+          this.pricePerHour = 0; // 重置價格
+        }
+      }
+    },
+    '$store.state.selectedVenueName': {
+      immediate: true,
+      async handler(newVenue) {
+        if (newVenue && newVenue !== this.selectedVenue) {
+          this.selectedVenue = newVenue;
+          await this.fetchVenuePrice(newVenue);
+          this.fetchBookedSlots();
         }
       }
     },
