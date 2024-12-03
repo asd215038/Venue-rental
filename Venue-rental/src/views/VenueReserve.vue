@@ -176,6 +176,8 @@ export default {
       pricePerHour: 300, // 每小時價格
       today: new Date().toISOString().split("T")[0], // 今天的日期
       q: [],
+      payment_status: false,
+      cancel_status: false,
     };
   },
   async created() {
@@ -361,9 +363,11 @@ export default {
           const reservationData = {
             reserve_date: slot.date,
             reserve_time: slot.hour.toString(),
-            reserve_user: auth.currentUser.email,
+            reserve_user: auth.currentUser.displayName,
             reserve_venue: this.venueName || this.selectedVenue,
-            reserve_price: this.pricePerHour
+            reserve_price: this.pricePerHour,
+            payment_status: this.payment_status,
+            cancel_status: this.cancel_status,
           };
 
           // 使用 setDoc 新增文件

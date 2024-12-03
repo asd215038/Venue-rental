@@ -10,6 +10,7 @@ import VenueManage from '../views/venue/VenueManage.vue'
 import NewsView from '../views/news/NewsView.vue'
 import addNews from '../views/news/addNews.vue'
 import ordersearch from "@/views/Ordersearch.vue";
+import OrdersManage from '@/views/orders/OrdersManage.vue'
 
 
 import Venuebrowse from "@/views/Venuebrowse.vue";
@@ -34,6 +35,7 @@ const router = createRouter({
     { path: "/manage/news", component: NewsView},
     { path: "/manage/news/add", component: addNews},
     { path: "/manage/news/edit/:newsId?", name: 'EditNews',component: addNews, props:true},
+    { path: "/manage/orders", component: OrdersManage},
 
   ]
 })

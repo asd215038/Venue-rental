@@ -24,6 +24,12 @@
               >
                 公告管理
               </router-link>
+              <router-link 
+                to="/manage/orders" 
+                class="text-gray-600 hover:text-blue-500 transition-colors"
+              >
+                訂單管理
+              </router-link>
             </div>
           </div>
         </div>
