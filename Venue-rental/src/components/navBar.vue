@@ -58,7 +58,7 @@
           </li>
           <li>
             <router-link
-                to="/"
+                to="/search"
                 class="block px-1 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
                 active-class="font-bold underline"
             >

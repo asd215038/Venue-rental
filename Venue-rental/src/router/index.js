@@ -9,6 +9,9 @@ import manage from '../views/ManageView.vue'
 import VenueManage from '../views/venue/VenueManage.vue'
 import NewsView from '../views/news/NewsView.vue'
 import addNews from '../views/news/addNews.vue'
+import ordersearch from "@/views/Ordersearch.vue";
+import OrdersManage from '@/views/orders/OrdersManage.vue'
+
 
 import Venuebrowse from "@/views/Venuebrowse.vue";
 import VenueReserve  from "@/views/VenueReserve.vue";
@@ -21,6 +24,7 @@ const router = createRouter({
     { path: "/logout", component: userLogout },
     {path: "/venue", component: Venuebrowse},
     {path:"/reserve", component: VenueReserve},
+    {path:"/search", component: ordersearch},
 
     // 後臺管理
     { path: "/manage", component: manage },
@@ -31,6 +35,8 @@ const router = createRouter({
     { path: "/manage/news", component: NewsView},
     { path: "/manage/news/add", component: addNews},
     { path: "/manage/news/edit/:newsId?", name: 'EditNews',component: addNews, props:true},
+    { path: "/manage/orders", component: OrdersManage},
+
   ]
 })
 
