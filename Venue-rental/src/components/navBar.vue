@@ -40,20 +40,20 @@
         <ul class="lg:flex space-y-2 lg:space-y-0 lg:space-x-1" >
           <li>
             <router-link
-                to="/reserve"
-                class="block px-1 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
-                active-class="font-bold underline"
-            >
-              場地租借
-            </router-link>
-          </li>
-          <li>
-            <router-link
                 to="/venue"
                 class="block px-1 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
                 active-class="font-bold underline"
             >
               場地查詢
+            </router-link>
+          </li>
+          <li>
+            <router-link
+                to="/reserve"
+                class="block px-1 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
+                active-class="font-bold underline"
+            >
+              場地租借
             </router-link>
           </li>
           <li>
