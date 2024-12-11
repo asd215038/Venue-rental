@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-6xl mx-auto px-4 py-8">
+  <div class="max-w-6xl mx-auto px-4 py-8 min-h-76vh">
     <!-- 頁面標題與按鈕 -->
     <div class="flex justify-between items-center mb-6">
       <div class="flex items-center space-x-4">
@@ -104,7 +104,7 @@
             </button>
           </div>
           <div class="mb-6">
-            <p class="text-gray-600">是否提出取消訂單申請？</p>
+            <p class="text-gray-600">真的要取消訂單？</p>
           </div>
           <div class="flex justify-end space-x-4">
             <button @click="showCancelModal = false"
@@ -246,7 +246,7 @@ export default {
         this.selectedOrderId = null;
 
         // 顯示成功訊息
-        alert("取消申請已送出");
+        alert("已成功取消！");
 
         // 重新載入訂單資料
         await this.fetchUserOrders();
