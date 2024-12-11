@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex justify-center px-4 mt-10">
+  <div class="min-h-7/10 flex justify-center px-4 mt-10">
     <div class="max-w-md w-full">
       <form @submit.prevent="handleLogin">
         <h3 class="text-2xl font-semibold text-center mb-5">會員登入</h3>

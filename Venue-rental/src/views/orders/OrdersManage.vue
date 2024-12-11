@@ -10,7 +10,7 @@
           <span class="mr-2">←</span>
           返回
         </button>
-        <h2 class="text-2xl font-bold text-blue-500">預約管理</h2>
+        <h2 class="text-2xl font-bold text-blue-500">訂單管理</h2>
       </div>
     </div>
 
@@ -149,7 +149,7 @@ export default {
   data() {
     return {
       reservations: [],
-      tableHeaders: ["訂單ID", "預約場地", "預約日期", "預約時間", "預約金額", "預約人", "付款狀態", "取消狀態", "操作"],
+      tableHeaders: ["訂單ID", "預約場地", "預約日期", "預約時間", "預約金額", "預約人", "付款狀態", "訂單狀態", "操作"],
       showDeleteModal: false,
       reservationIdToDelete: null,
       loading: true,

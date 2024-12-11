@@ -74,7 +74,7 @@
       <h2 class="text-2xl text-center text-blue-500 font-bold mb-6">場館簡介</h2>
       <div class="flex flex-col md:flex-row gap-6 items-center">
         <div class="md:w-1/2">
-          <img src="@/assets/images/badminton1.jpeg" alt="場館照片" class="rounded-lg shadow-lg w-full">
+          <img src="@/assets/images/venue/basketball1.jpg" alt="場館照片" class="rounded-lg shadow-lg w-full">
         </div>
         <div class="md:w-1/2 space-y-4">
           <p>歡迎來到我們的運動場地租借平台！</p>
