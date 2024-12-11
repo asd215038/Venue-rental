@@ -96,7 +96,7 @@
 <script>
 import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
 import { db } from '@/config/firebaseConfig';
-import { addDoc, collection } from 'firebase/firestore';
+import { setDoc, collection, getDocs, doc } from 'firebase/firestore';
 
 export default {
   data() {
@@ -107,7 +107,9 @@ export default {
         password: "",
         phoneNumber: "",
         gender: "",
-        birth: ""
+        birth: "",
+        isAdmin: false,
+        enabled: false,
       },
       confirmPassword: "",
     };
@@ -146,17 +148,24 @@ export default {
         // 發送驗證信
         await sendEmailVerification(user);
 
-        alert("註冊成功！驗證信已發送到您的信箱，請查收。");
+        // 獲取目前 users collection 的文件數量
+        const querySnapshot = await getDocs(collection(db, "users"));
+        const currentCount = querySnapshot.size;
+        const newDocId = (currentCount + 1).toString();
 
-        // 儲存用戶資料到 Firestore
-        await addDoc(collection(db, "users"), {
+        // 使用 setDoc 儲存用戶資料到 Firestore
+        await setDoc(doc(db, "users", newDocId), {
           userName: this.user.userName,
           email: this.user.email,
           phoneNumber: this.user.phoneNumber,
           gender: this.user.gender,
           birthDate: this.user.birth,
-          uid: user.uid  // 加入 user ID 作為參考
+          uid: user.uid,  // 加入 user ID 作為參考
+          isAdmin: this.user.isAdmin,
+          enabled: this.user.enabled,
         });
+
+        alert("註冊成功！驗證信已發送到您的信箱，請查收。");
 
         // 註冊後導航到主頁或其他頁面
         this.$router.push("/login");
