@@ -63,7 +63,7 @@
           <p class="text-white">{{ user.displayName }}</p>
         </div>
 
-        <router-link v-if="isLoggedIn" to="logout"
+        <router-link v-if="isLoggedIn" to="/logout"
           class="px-4 py-2 text-white hover:text-yellow-300 transition duration-150">
           登出
         </router-link>
