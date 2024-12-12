@@ -380,7 +380,6 @@ export default {
         return;
       }
 
-
       if (!this.acceptedTerms) {
         alert('請先同意使用者條款');
         return;
@@ -401,6 +400,7 @@ export default {
             reserve_user: auth.currentUser.displayName,
             reserve_venue: this.venueName || this.selectedVenue,
             reserve_price: this.pricePerHour,
+            order_date: new Date().toISOString().split('T')[0], // 新增訂單日期
             payment_status: this.paymentMethod === 'online',
             cancel_status: this.cancel_status,
           };
@@ -421,9 +421,9 @@ export default {
         console.error("預約失敗:", error);
         alert('預約失敗，請稍後再試');
       }
-    },
+    }
   },
-  watch: {
+    watch: {
     // 監聽場地查詢頁面vuex傳入場地
     '$store.state.selectedVenueName': {
       immediate: true,
