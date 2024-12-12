@@ -2,7 +2,7 @@ import { createStore } from 'vuex'
 import { firebaseAuth } from '@/config/firebaseConfig';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
-
+import { doc, updateDoc } from 'firebase/firestore';
 export default createStore({
   state: {
     user: {
@@ -34,10 +34,10 @@ export default createStore({
     SET_USER_EMAIL(state, email) {
       state.user.email = email;
     },
-    SET_VENUE_NAME(state, venueName) {  // 新增 mutation
+    SET_VENUE_NAME(state, venueName) {
       state.selectedVenueName = venueName;
     },
-    CLEAN_VENUE_NAME(state) {  // 新增 mutation
+    CLEAN_VENUE_NAME(state) {
       state.selectedVenueName = '';
     },
     SET_USER_ADMIN(state, isAdmin) {
@@ -53,6 +53,18 @@ export default createStore({
           context.commit('SET_USER_DISPLAYNAME', response.user.displayName);
           context.commit('SET_USER_EMAIL', response.user.email);
           context.commit('SET_LOGGED_IN', true);
+
+          // 添加用戶到 Firestore，初始狀態 `enabled: false`
+          const db = getFirestore();
+          const usersRef = collection(db, 'users');
+          await updateDoc(doc(usersRef, response.user.email), {
+            email: email,
+            displayName: name,
+            isAdmin: false,
+            enabled: false, // 初始設置為未啟用
+          });
+
+          alert('註冊成功！驗證信已發送到您的信箱，請查收。');
         } else {
           throw new Error('Unable to register user');
         }
@@ -68,7 +80,7 @@ export default createStore({
           context.commit('SET_USER_DISPLAYNAME', response.user.displayName);
           context.commit('SET_USER_EMAIL', response.user.email);
           context.commit('SET_LOGGED_IN', true);
-          await context.dispatch('checkAdminStatus');  // 新增此行
+          await context.dispatch('checkAdminStatus'); // 檢查管理員狀態
         } else {
           throw new Error('Login failed');
         }
@@ -77,18 +89,46 @@ export default createStore({
       }
     },
 
-    initAuth({ commit, dispatch }) {  // 修改這裡，添加 dispatch
+    async updateUserStatus(context, user) {
+      if (user.emailVerified) {
+        try {
+          const db = getFirestore();
+          const usersRef = collection(db, 'users');
+          const q = query(usersRef, where('email', '==', user.email));
+          const querySnapshot = await getDocs(q);
+
+          if (!querySnapshot.empty) {
+            const userDocRef = querySnapshot.docs[0].ref;
+            const userData = querySnapshot.docs[0].data();
+
+            if (!userData.enabled) {
+              await updateDoc(userDocRef, { enabled: true });
+              console.log('用戶已啟用');
+            }
+          }
+        } catch (error) {
+          console.error('Error updating user enabled status:', error);
+        }
+      }
+    },
+
+    initAuth({ commit, dispatch }) {
       onAuthStateChanged(firebaseAuth, async (user) => {
         if (user) {
           commit('SET_USER_DISPLAYNAME', user.displayName);
           commit('SET_USER_EMAIL', user.email);
           commit('SET_LOGGED_IN', true);
-          await dispatch('checkAdminStatus');  // 新增此行
+
+          // 檢查用戶電子郵件驗證狀態並更新 `enabled`
+          await dispatch('updateUserStatus', user);
+
+          // 檢查管理員權限
+          await dispatch('checkAdminStatus');
         } else {
           commit('SET_USER_DISPLAYNAME', null);
           commit('SET_USER_EMAIL', null);
           commit('SET_LOGGED_IN', false);
-          commit('SET_USER_ADMIN', false);  // 新增此行
+          commit('SET_USER_ADMIN', false);
         }
       });
     },
@@ -104,27 +144,25 @@ export default createStore({
       }
     },
 
-    //預約時 紀錄選取到的場地 
-    setVenueName({ commit }, venueName) {  // 新增 action
+    setVenueName({ commit }, venueName) {
       commit('SET_VENUE_NAME', venueName);
     },
-    cleanVenueName({ commit }) {  // 新增 action
+
+    cleanVenueName({ commit }) {
       commit('CLEAN_VENUE_NAME');
     },
-    //檢查管理員狀態
+
     async checkAdminStatus({ commit, state }) {
       try {
         if (!state.user.email) return;
-        
+
         const db = getFirestore();
         const usersRef = collection(db, 'users');
-        // 使用 email 來查詢對應的用戶文檔
         const q = query(usersRef, where('email', '==', state.user.email));
         const querySnapshot = await getDocs(q);
-        
+
         if (!querySnapshot.empty) {
           const userDoc = querySnapshot.docs[0];
-          console.log('User doc data:', userDoc.data()); // 調試用
           commit('SET_USER_ADMIN', userDoc.data().isAdmin || false);
         } else {
           commit('SET_USER_ADMIN', false);
@@ -135,5 +173,5 @@ export default createStore({
       }
     },
   },
-  modules: {}
-})
+  modules: {},
+});
