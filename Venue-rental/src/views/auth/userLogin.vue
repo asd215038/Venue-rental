@@ -42,7 +42,7 @@
 
         <!-- Forgot Password Link -->
         <div class="mt-4 flex justify-center">
-          <router-link to="/forgot-password"
+          <router-link to="/forgotPassword"
             class="text-decoration underline text-sm text-blue-500 hover:text-blue-600 transition-colors duration-200">
             忘記密碼?
           </router-link>
