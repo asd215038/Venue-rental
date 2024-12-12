@@ -12,7 +12,7 @@ import addNews from '../views/news/addNews.vue'
 import ordersearch from "@/views/Ordersearch.vue";
 import OrdersManage from '@/views/orders/OrdersManage.vue'
 import forgotPassword from "@/views/auth/forgotPassword.vue";
-
+import Profile from "@/views/auth/Profile.vue";
 import Venuebrowse from "@/views/Venuebrowse.vue";
 import VenueReserve  from "@/views/VenueReserve.vue";
 const router = createRouter({
@@ -26,6 +26,7 @@ const router = createRouter({
     {path:"/reserve", component: VenueReserve},
     {path:"/search", component: ordersearch},
     {path:"/forgotPassword", component: forgotPassword},
+    {path:"/profile", component: Profile},
     // 後臺管理
     { path: "/manage", component: manage },
     { path: "/manage/user", component: UserManageVIew },

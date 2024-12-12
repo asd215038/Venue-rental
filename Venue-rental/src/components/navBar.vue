@@ -43,6 +43,13 @@
               訂單查詢
             </router-link>
           </li>
+          <li>
+            <router-link to="/profile"
+                         class="block px-1 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
+                         active-class="font-bold underline">
+              個人資料管理
+            </router-link>
+          </li>
           <li v-if="isAdmin">
             <router-link to="/manage"
               class="block px-1 py-2 text-white hover:text-yellow-300 rounded transition duration-150"
