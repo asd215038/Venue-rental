@@ -192,6 +192,7 @@ export default {
       q: [],
       payment_status: false,
       cancel_status: false,
+      expired_status: false,
     };
   },
   async created() {
@@ -403,6 +404,7 @@ export default {
             order_date: new Date().toISOString().split('T')[0], // 新增訂單日期
             payment_status: this.paymentMethod === 'online',
             cancel_status: this.cancel_status,
+            expired_status: this.expired_status,
           };
 
           // 使用 setDoc 新增文件
