@@ -14,16 +14,20 @@
       </div>
     </div>
 
-    <!-- 預約列表 -->
-    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <!-- 當前預約列表 -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+      <div class="px-6 py-4 bg-blue-50">
+        <h3 class="text-xl font-semibold text-blue-600">當前預約</h3>
+      </div>
+      
       <!-- 載入中提示 -->
       <div v-if="loading" class="flex justify-center items-center py-8">
         <span class="text-gray-500">載入中...</span>
       </div>
       
       <!-- 無資料提示 -->
-      <div v-else-if="reservations.length === 0" class="flex justify-center items-center py-8">
-        <span class="text-gray-500">目前沒有預約資料</span>
+      <div v-else-if="currentReservations.length === 0" class="flex justify-center items-center py-8">
+        <span class="text-gray-500">目前沒有進行中的預約</span>
       </div>
       
       <!-- 資料表格 -->
@@ -40,7 +44,7 @@
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="reservation in reservations" 
+            <tr v-for="reservation in currentReservations" 
                 :key="reservation.reserveId"
                 class="hover:bg-gray-50 transition-colors"
             >
@@ -75,7 +79,7 @@
                 <span :class="{
                   'px-2 py-1 rounded-full text-xs font-medium': true,
                   'bg-red-100 text-red-600': reservation.cancel_status === true,
-                  'bg-green-100 text-green-600': reservation.cancel_status === false
+                  'bg-green-100 text-green-600': !reservation.cancel_status
                 }">
                   {{ reservation.cancel_status ? '已取消' : '進行中' }}
                 </span>
@@ -88,6 +92,86 @@
                   >
                     編輯
                   </button>
+                  <button 
+                    @click="openDeleteModal(reservation.reserveId)"
+                    class="px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
+                  >
+                    刪除
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 分隔線 -->
+    <div class="border-t-2 border-gray-200 my-8"></div>
+
+    <!-- 歷史紀錄列表 -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="px-6 py-4 bg-gray-50">
+        <h3 class="text-xl font-semibold text-gray-600">歷史紀錄</h3>
+      </div>
+      
+      <!-- 無歷史資料提示 -->
+      <div v-if="historicalReservations.length === 0" class="flex justify-center items-center py-8">
+        <span class="text-gray-500">暫無歷史紀錄</span>
+      </div>
+      
+      <!-- 歷史資料表格 -->
+      <div v-else class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50">
+            <tr>
+              <th v-for="(header, index) in tableHeaders" 
+                  :key="index" 
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                {{ header }}
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr v-for="reservation in historicalReservations" 
+                :key="reservation.reserveId"
+                class="hover:bg-gray-50 transition-colors"
+            >
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                {{ reservation.reserveId }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ reservation.reserve_venue }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ reservation.reserve_date }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ reservation.reserve_time }}:00
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                NT$ {{ reservation.reserve_price }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ reservation.reserve_user }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <span :class="{
+                  'px-2 py-1 rounded-full text-xs font-medium': true,
+                  'bg-green-100 text-green-600': reservation.payment_status === true,
+                  'bg-red-100 text-red-600': reservation.payment_status === false
+                }">
+                  {{ reservation.payment_status ? '已付款' : '未付款' }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <span class="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                  已過期
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <div class="flex space-x-3">
                   <button 
                     @click="openDeleteModal(reservation.reserveId)"
                     class="px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
@@ -143,7 +227,7 @@
 
 <script>
 import { db } from '@/config/firebaseConfig';
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 
 export default {
   data() {
@@ -154,6 +238,19 @@ export default {
       reservationIdToDelete: null,
       loading: true,
     };
+  },
+
+  computed: {
+    currentReservations() {
+      return this.reservations
+        .filter(reservation => !reservation.expired_status)
+        .sort((a, b) => Number(b.reserveId) - Number(a.reserveId));
+    },
+    historicalReservations() {
+      return this.reservations
+        .filter(reservation => reservation.expired_status)
+        .sort((a, b) => Number(b.reserveId) - Number(a.reserveId));
+    }
   },
 
   mounted() {
@@ -170,34 +267,39 @@ export default {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         
-        // 自動刪除過期預約
-        const deletionPromises = [];
+        // 更新過期預約的狀態
+        const updatePromises = [];
         querySnapshot.docs.forEach(doc => {
           const data = doc.data();
           const reserveDate = new Date(data.reserve_date);
           reserveDate.setHours(0, 0, 0, 0);
           
-          if (reserveDate < today) {
-            // 將過期的預約加入刪除佇列
-            deletionPromises.push(deleteDoc(doc.ref));
+          if (reserveDate < today && !data.expired_status) {
+            // 更新過期的預約狀態
+            updatePromises.push(
+              updateDoc(doc.ref, {
+                expired_status: true
+              })
+            );
           }
         });
 
-        // 執行所有刪除操作
-        if (deletionPromises.length > 0) {
-          await Promise.all(deletionPromises);
+        // 執行所有更新操作
+        if (updatePromises.length > 0) {
+          await Promise.all(updatePromises);
         }
 
-        // 重新獲取剩餘的預約資料
+        // 重新獲取更新後的預約資料
         const updatedSnapshot = await getDocs(collection(db, "reservations"));
         
-        // 處理剩餘資料
+        // 處理資料
         this.reservations = updatedSnapshot.docs
           .map(doc => ({
             reserveId: doc.id,
-            ...doc.data()
+            ...doc.data(),
+            expired_status: doc.data().expired_status || false
           }))
-          .sort((a, b) => new Date(a.reserve_date) - new Date(b.reserve_date));
+          .sort((a, b) => Number(b.reserveId) - Number(a.reserveId)); // 依照 ID 降冪排序
 
       } catch (error) {
         console.error("處理預約資料時發生錯誤:", error);
