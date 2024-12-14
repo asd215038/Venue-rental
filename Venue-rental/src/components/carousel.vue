@@ -68,7 +68,7 @@ export default {
         async getPictures() {
             try {
                 // 取得所有圖片檔案
-                const images = import.meta.glob('../assets/images/*.{png,jpg,jpeg,PNG,JPEG}', {
+                const images = import.meta.glob('../assets/images/carousel/*.{png,jpg,jpeg,PNG,JPEG}', {
                     eager: true,
                     as: 'url'
                 });

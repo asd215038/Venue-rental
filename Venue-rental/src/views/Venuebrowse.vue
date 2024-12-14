@@ -30,8 +30,8 @@
     <!-- 場地卡片 -->
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       <div v-for="venue in displayVenues" :key="venue.venueId"
-           class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col cursor-pointer" @click="openModal(venue)">
-        <img :src="venue.imageUrl" alt="場地圖片" class="h-48 w-full object-cover" />
+        class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col cursor-pointer" @click="openModal(venue)">
+        <img :src="'/src/assets/images/venue/'+venue.imageUrl" alt="場地圖片" class="h-48 w-full object-cover" />
         <div class="p-4 flex-1 flex flex-col">
           <h3 class="text-lg font-bold text-gray-800 mb-2">{{ venue.venues_name }}</h3>
           <p class="text-sm text-gray-600 mb-4">{{ venue.description || '暫無描述' }}</p>
@@ -43,10 +43,10 @@
 
     <!-- 場地詳細資訊模態框 -->
     <div v-if="isModalOpen && selectedVenue"
-         class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div class="bg-white rounded-lg p-6 max-w-lg w-full">
         <h3 class="text-lg font-bold text-gray-800 mb-2">{{ selectedVenue.venues_name }}</h3>
-        <img :src="selectedVenue.imageUrl" alt="場地圖片" class="h-48 w-full object-cover mb-4" />
+        <img :src="'/src/assets/images/venue/'+selectedVenue.imageUrl" alt="場地圖片" class="h-48 w-full object-cover mb-4" />
         <p class="text-sm text-gray-600 mb-4">{{ selectedVenue.description || '暫無描述' }}</p>
         <p class="text-sm text-gray-800 font-medium">NT$ {{ selectedVenue.price_per_hour }}/小時</p>
         <p class="text-sm text-gray-800 font-medium">容納人數: {{ selectedVenue.capacity }}</p>
@@ -69,168 +69,170 @@ import { db } from '@/config/firebaseConfig';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 
 export default {
-data() {
-return {
-// Venue-related data
-venues: [], // All venues from Firebase
-categories: [], // Unique venue categories
+  data() {
+    return {
+      // Venue-related data
+      venues: [], // All venues from Firebase
+      categories: [], // Unique venue categories
 
-// Filter inputs
-selectedCategory: "",
-selectedDate: "",
-selectedTime: "",
-selectedCapacity: null,
-searchKeyword: "",
+      // Filter inputs
+      selectedCategory: "",
+      selectedDate: "",
+      selectedTime: "",
+      selectedCapacity: null,
+      searchKeyword: "",
 
-// Filtered results and modal state
-filteredVenues: [],
-isModalOpen: false,
-selectedVenue: null,
+      // Filtered results and modal state
+      filteredVenues: [],
+      isModalOpen: false,
+      selectedVenue: null,
 
-// Additional state for better UX
-isLoading: false,
-noResultsFound: false
-};
-},
+      // Additional state for better UX
+      isLoading: false,
+      noResultsFound: false
+    };
+  },
 
-computed: {
-// Determine which venues to display
-displayVenues() {
-// If filtered venues exist, show them
-// Otherwise, show all venues
-return this.filteredVenues.length > 0
-? this.filteredVenues
-: this.venues;
-}
-},
+  computed: {
+    // Determine which venues to display
+    displayVenues() {
+      // If filtered venues exist, show them
+      // Otherwise, show all venues
+      return this.filteredVenues.length > 0
+        ? this.filteredVenues
+        : this.venues;
+    }
+  },
 
-watch: {
-// Watch all filter inputs and trigger filtering
-selectedCategory: 'filterVenues',
-selectedDate: 'filterVenues',
-selectedTime: 'filterVenues',
-selectedCapacity: 'filterVenues',
-searchKeyword: 'filterVenues',
-venues: {
-handler: 'filterVenues',
-immediate: true
-}
-},
+  watch: {
+    // Watch all filter inputs and trigger filtering
+    selectedCategory: 'filterVenues',
+    selectedDate: 'filterVenues',
+    selectedTime: 'filterVenues',
+    selectedCapacity: 'filterVenues',
+    searchKeyword: 'filterVenues',
+    venues: {
+      handler: 'filterVenues',
+      immediate: true
+    }
+  },
 
-mounted() {
-this.fetchVenues();
-},
+  mounted() {
+    this.fetchVenues();
+  },
 
-methods: {
-async fetchVenues() {
-// Set loading state
-this.isLoading = true;
+  methods: {
+    async fetchVenues() {
+      // Set loading state
+      this.isLoading = true;
 
-try {
-// Fetch venues from Firestore
-const querySnapshot = await getDocs(collection(db, "venues"));
+      try {
+        // Fetch venues from Firestore
+        const querySnapshot = await getDocs(collection(db, "venues"));
 
-// Transform firestore docs to array of venues
-const allVenues = querySnapshot.docs.map(doc => ({
-venueId: doc.id,
-...doc.data()
-}));
+        // Transform firestore docs to array of venues
+        const allVenues = querySnapshot.docs.map(doc => ({
+          venueId: doc.id,
+          ...doc.data()
+        }));
 
-// Update venues
-this.venues = allVenues;
+        // Update venues
+        this.venues = allVenues;
 
-// Extract unique categories
-this.categories = [
-...new Set(allVenues.map(venue => venue.category).filter(Boolean))
-];
+        // Extract unique categories
+        this.categories = [
+          ...new Set(allVenues.map(venue => venue.category).filter(Boolean))
+        ];
 
-// Initial filtering
-this.filterVenues();
-} catch (error) {
-console.error("Error fetching venues:", error);
-// Optionally show error message to user
-} finally {
-this.isLoading = false;
-}
-},
+        console.log(this.venues[0].imageUrl)
+        
+        // Initial filtering
+        this.filterVenues();
+      } catch (error) {
+        console.error("Error fetching venues:", error);
+        // Optionally show error message to user
+      } finally {
+        this.isLoading = false;
+      }
+    },
 
-filterVenues() {
-// Ensure venues are loaded
-if (!this.venues.length) return;
+    filterVenues() {
+      // Ensure venues are loaded
+      if (!this.venues.length) return;
 
-// Filter venues based on multiple criteria
-this.filteredVenues = this.venues.filter(venue => {
-// Category filter
-const categoryMatch = !this.selectedCategory ||
-venue.category === this.selectedCategory;
+      // Filter venues based on multiple criteria
+      this.filteredVenues = this.venues.filter(venue => {
+        // Category filter
+        const categoryMatch = !this.selectedCategory ||
+          venue.category === this.selectedCategory;
 
-// Capacity filter (convert to number and handle null)
-const capacityMatch = !this.selectedCapacity ||
-venue.capacity >= Number(this.selectedCapacity);
+        // Capacity filter (convert to number and handle null)
+        const capacityMatch = !this.selectedCapacity ||
+          venue.capacity >= Number(this.selectedCapacity);
 
-// Keyword filter (case-insensitive and handle undefined)
-const keywordMatch = !this.searchKeyword ||
-(venue.venues_name && venue.venues_name.toLowerCase().includes(this.searchKeyword.toLowerCase())) ||
-(venue.description && venue.description.toLowerCase().includes(this.searchKeyword.toLowerCase()));
+        // Keyword filter (case-insensitive and handle undefined)
+        const keywordMatch = !this.searchKeyword ||
+          (venue.venues_name && venue.venues_name.toLowerCase().includes(this.searchKeyword.toLowerCase())) ||
+          (venue.description && venue.description.toLowerCase().includes(this.searchKeyword.toLowerCase()));
 
-// Date and Time filter (more robust)
-const dateTimeMatch = !this.selectedDate ||
-(venue.availableDates &&
-venue.availableDates.some(
-availableDate =>
-availableDate.date === this.selectedDate &&
-(!this.selectedTime ||
-availableDate.timeSlots.includes(this.selectedTime))
-)
-);
+        // Date and Time filter (more robust)
+        const dateTimeMatch = !this.selectedDate ||
+          (venue.availableDates &&
+            venue.availableDates.some(
+              availableDate =>
+                availableDate.date === this.selectedDate &&
+                (!this.selectedTime ||
+                  availableDate.timeSlots.includes(this.selectedTime))
+            )
+          );
 
-// Combine all filters
-return categoryMatch &&
-capacityMatch &&
-keywordMatch &&
-dateTimeMatch;
-});
+        // Combine all filters
+        return categoryMatch &&
+          capacityMatch &&
+          keywordMatch &&
+          dateTimeMatch;
+      });
 
-// Update no results flag
-this.noResultsFound = this.filteredVenues.length === 0;
-},
+      // Update no results flag
+      this.noResultsFound = this.filteredVenues.length === 0;
+    },
 
-openModal(venue) {
-this.selectedVenue = venue;
-this.isModalOpen = true;
+    openModal(venue) {
+      this.selectedVenue = venue;
+      this.isModalOpen = true;
 
-// Optional: Update Vuex store with selected venue name
-if (this.$store) {
-this.$store.dispatch('setVenueName', venue.venues_name);
-}
-},
+      // Optional: Update Vuex store with selected venue name
+      if (this.$store) {
+        this.$store.dispatch('setVenueName', venue.venues_name);
+      }
+    },
 
-closeModal() {
-this.isModalOpen = false;
-this.selectedVenue = null;
-},
+    closeModal() {
+      this.isModalOpen = false;
+      this.selectedVenue = null;
+    },
 
-goToBookingPage() {
-// Navigate to booking page
-this.$router.push({
-path: '/reserve',
-query: {
-venueId: this.selectedVenue.venueId,
-venueName: this.selectedVenue.venues_name
-}
-});
-this.closeModal();
-},
+    goToBookingPage() {
+      // Navigate to booking page
+      this.$router.push({
+        path: '/reserve',
+        query: {
+          venueId: this.selectedVenue.venueId,
+          venueName: this.selectedVenue.venues_name
+        }
+      });
+      this.closeModal();
+    },
 
-// Reset all filters
-resetFilters() {
-this.selectedCategory = "";
-this.selectedDate = "";
-this.selectedTime = "";
-this.selectedCapacity = null;
-this.searchKeyword = "";
-}
-}
+    // Reset all filters
+    resetFilters() {
+      this.selectedCategory = "";
+      this.selectedDate = "";
+      this.selectedTime = "";
+      this.selectedCapacity = null;
+      this.searchKeyword = "";
+    }
+  }
 };
 </script>
 <style scoped>

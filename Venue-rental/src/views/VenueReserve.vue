@@ -192,6 +192,7 @@ export default {
       q: [],
       payment_status: false,
       cancel_status: false,
+      expired_status: false,
     };
   },
   async created() {
@@ -403,6 +404,7 @@ export default {
             reserve_price: this.pricePerHour,
             payment_status: this.paymentMethod === 'online',
             cancel_status: this.cancel_status,
+            expired_status: this.expired_status,
           };
 
           // 使用 setDoc 新增文件

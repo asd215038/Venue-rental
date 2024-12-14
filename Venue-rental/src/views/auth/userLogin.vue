@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex justify-center px-4 mt-10">
+  <div class="min-h-7/10 flex justify-center px-4 mt-10">
     <div class="max-w-md w-full">
       <form @submit.prevent="handleLogin">
         <h3 class="text-2xl font-semibold text-center mb-5">會員登入</h3>
@@ -7,9 +7,8 @@
         <div class="space-y-4">
           <!-- Register Button -->
           <div class="mt-4 flex justify-center pb-6">
-            <router-link
-                to="/register"
-                class="text-decoration underline text-lg text-blue-500 hover:text-blue-600 transition-colors duration-200">
+            <router-link to="/register"
+              class="text-decoration underline text-lg text-blue-500 hover:text-blue-600 transition-colors duration-200">
               還沒有會員嗎？請按此註冊
             </router-link>
           </div>
@@ -18,11 +17,8 @@
           <div class="flex items-center justify-end space-x-2">
             <label class="w-20 text-right">電子郵件：</label>
             <div class="flex-1 max-w-xs">
-              <input
-                  type="email"
-                  v-model="user.email"
-                  class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+              <input type="email" v-model="user.email"
+                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
             </div>
           </div>
 
@@ -30,29 +26,24 @@
           <div class="flex items-center justify-end space-x-2">
             <label class="w-20 text-right">密碼：</label>
             <div class="flex-1 max-w-xs">
-              <input
-                  type="password"
-                  v-model="user.password"
-                  class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+              <input type="password" v-model="user.password"
+                class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
             </div>
           </div>
         </div>
 
         <!-- Login Button -->
         <div class="mt-6 flex justify-center">
-          <button
-              type="submit"
-              class="px-6 py-2 text-blue-500 border border-blue-500 rounded-md hover:bg-blue-500 hover:text-white focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200">
+          <button type="submit"
+            class="px-6 py-2 text-blue-500 border border-blue-500 rounded-md hover:bg-blue-500 hover:text-white focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200">
             登入
           </button>
         </div>
 
         <!-- Forgot Password Link -->
         <div class="mt-4 flex justify-center">
-          <router-link
-              to="/forgot-password"
-              class="text-decoration underline text-sm text-blue-500 hover:text-blue-600 transition-colors duration-200">
+          <router-link to="/forgot-password"
+            class="text-decoration underline text-sm text-blue-500 hover:text-blue-600 transition-colors duration-200">
             忘記密碼?
           </router-link>
         </div>
@@ -64,6 +55,8 @@
 
 <script>
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { db } from '@/config/firebaseConfig';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
 export default {
   data() {
@@ -77,13 +70,30 @@ export default {
   },
   methods: {
     async handleLogin() {
-      const auth = getAuth();
       try {
+        // 先檢查用戶是否被軟刪除
+        const userQuery = query(
+          collection(db, "users"),
+          where("email", "==", this.user.email)
+        );
+
+        const querySnapshot = await getDocs(userQuery);
+
+        // 檢查是否找到用戶且是否被刪除
+        if (!querySnapshot.empty) {
+          const userData = querySnapshot.docs[0].data();
+          if (userData.is_delete) {
+            alert("此帳號已被停用，請聯繫管理員。");
+            return;
+          }
+        }
+
         // 嘗試用 Firebase 登入
+        const auth = getAuth();
         const userCredential = await signInWithEmailAndPassword(
-            auth,
-            this.user.email,
-            this.user.password
+          auth,
+          this.user.email,
+          this.user.password
         );
 
         const user = userCredential.user;
