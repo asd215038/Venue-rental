@@ -101,32 +101,78 @@
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 <span :class="{
                   'px-2 py-1 rounded-full text-xs font-medium': true,
-                  'bg-green-100 text-green-600': reservation.payment_status === true,
-                  'bg-red-100 text-red-600': reservation.payment_status === false
+                  'bg-green-100 text-green-600 hover:bg-green-200': reservation.payment_status === true,
+                  'bg-red-100 text-red-600 hover:bg-red-200': reservation.payment_status === false
                 }">
                   {{ reservation.payment_status ? '已付款' : '未付款' }}
                 </span>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                <span :class="{
-                  'px-2 py-1 rounded-full text-xs font-medium': true,
-                  'bg-red-100 text-red-600': reservation.cancel_status === true,
-                  'bg-green-100 text-green-600': reservation.cancel_status === false
-                }">
+              <span :class="{
+                'px-2 py-1 rounded-full text-xs font-medium': true,
+                'bg-red-100 text-red-600 hover:bg-red-200': reservation.cancel_status === true,
+                'bg-green-100 text-green-600 hover:bg-green-200': reservation.cancel_status === false
+              }">
                   {{ reservation.cancel_status ? '已取消' : '進行中' }}
                 </span>
-            </td>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <button 
+                  @click="openDeleteModal(reservation.reserveId)"
+                  class="px-2 py-1 bg-red-100 text-red-600 rounded-full text-xs font-medium hover:bg-red-200 "
+                >
+                  刪除
+                </button>
+              </td>
           </tr>
           </tbody>
         </table>
       </div>
+
+      <!-- 刪除確認 Modal -->
+      <div 
+        v-if="showDeleteModal" 
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      >
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-4">
+          <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-xl font-bold text-gray-900">確認刪除</h3>
+              <button 
+                @click="showDeleteModal = false"
+                class="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <span class="text-2xl">&times;</span>
+              </button>
+            </div>
+            <div class="mb-6">
+              <p class="text-gray-600">確定要刪除此訂單嗎？此操作無法復原。</p>
+            </div>
+            <div class="flex justify-end space-x-4">
+              <button 
+                @click="showDeleteModal = false"
+                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                取消
+              </button>
+              <button 
+                @click="confirmDelete"
+                class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              >
+                確認刪除
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
 
 <script>
 import { db } from "@/config/firebaseConfig";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 
 export default {
   data() {
@@ -142,6 +188,7 @@ export default {
         reserve_user: "預約人",
         payment_status: "付款狀態",
         cancel_status: "訂單狀態",
+        operations: "操作"
       },
       filterVenue: "",
       filterUser: "",
@@ -151,6 +198,8 @@ export default {
       sortKey: "reserveId",
       sortAsc: true,
       loading: true,
+      reservationIdToDelete: null,
+      showDeleteModal: false,
     };
   },
   async mounted() {
@@ -207,6 +256,23 @@ export default {
     sortTable(key) {
       this.sortAsc = this.sortKey === key ? !this.sortAsc : true;
       this.sortKey = key;
+    },
+    openDeleteModal(newsId) {
+      this.reservationIdToDelete = newsId;
+      this.showDeleteModal = true;
+    },
+    async confirmDelete() {
+      if (this.reservationIdToDelete) {
+        try {
+          await deleteDoc(doc(db, "reservations", this.reservationIdToDelete));
+          await this.getReservations(); // 重新載入公告列表
+          console.log("訂單已成功刪除！");
+        } catch (error) {
+          console.error("刪除公告時發生錯誤:", error);
+        }
+        this.reservationIdToDelete = null;
+        this.showDeleteModal = false;
+      }
     },
   },
 };
