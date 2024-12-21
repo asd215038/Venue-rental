@@ -4,7 +4,7 @@
     <div class="flex justify-between items-center mb-6">
       <div class="flex items-center space-x-4">
         <button @click="$router.push('/')"
-                class="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors flex items-center">
+          class="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors flex items-center">
           <span class="mr-2">←</span>
           返回
         </button>
@@ -20,52 +20,55 @@
       <div v-else class="overflow-x-auto">
         <table class="w-full">
           <thead class="bg-gray-50">
-          <tr>
-            <th v-for="(header, index) in tableHeaders" :key="index"
+            <tr>
+              <th v-for="(header, index) in tableHeaders" :key="index"
                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              {{ header }}
-            </th>
-          </tr>
+                {{ header }}
+              </th>
+            </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="order in orders" :key="order.original_id" class="hover:bg-gray-50 transition-colors">
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-              {{ order.order_id }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-              {{ order.original_id }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-              {{ order.reserve_venue }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-              {{ order.reserve_date }} {{ order.reserve_time }}:00
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-              {{ order.order_date }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-              NT$ {{ order.total_amount }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm">
+            <tr v-for="order in orders" :key="order.original_id" class="hover:bg-gray-50 transition-colors">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                {{ order.order_id }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ order.original_id }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ order.reserve_venue }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ order.reserve_date }} {{ order.reserve_time }}:00
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ order.order_date }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                NT$ {{ order.total_amount }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
                 <span :class="getStatusClass(order)">
                   {{ getOrderStatus(order) }}
                 </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-              <div class="flex space-x-3">
-                <button @click="viewOrderDetails(order.original_id)"
-                        class="px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition-colors">
-                  查看
-                </button>
-                <button v-if="!order.payment_status && !order.cancel_status"
-                        @click="requestCancellation(order.original_id)"
-                        class="px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors">
-                  取消訂單
-                </button>
-              </div>
-            </td>
-          </tr>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ order.payment_accunt_last_five_number }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <div class="flex space-x-3">
+                  <button @click="viewOrderDetails(order.original_id)"
+                    class="px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition-colors">
+                    查看
+                  </button>
+                  <button v-if="!order.payment_status && !order.cancel_status"
+                    @click="requestCancellation(order.original_id)"
+                    class="px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors">
+                    取消訂單
+                  </button>
+                </div>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -89,10 +92,19 @@
             <p><strong>預約時段:</strong> {{ orderDetails.reserve_time }}:00</p>
             <p><strong>金額:</strong> NT$ {{ orderDetails.total_amount }}</p>
             <p><strong>訂單狀態:</strong> {{ getOrderStatus(orderDetails) }}</p>
+            <p class="flex items-center gap-3 mb-2">
+              <strong>付款帳號末五碼:</strong>
+              <input v-model="payment_accunt_last_five_number" type="text"
+                class="border border-gray-300 rounded px-3 py-1 w-32" maxlength="5" />
+              <button @click="updatePaymentAccuntLastFiveNumber"
+                class="px-4 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                確認
+              </button>
+            </p>
           </div>
           <div class="flex justify-end">
             <button @click="showOrderModal = false"
-                    class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+              class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
               關閉
             </button>
           </div>
@@ -115,11 +127,11 @@
           </div>
           <div class="flex justify-end space-x-4">
             <button @click="showCancelModal = false"
-                    class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+              class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
               取消
             </button>
             <button @click="confirmCancellation"
-                    class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+              class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
               確認
             </button>
           </div>
@@ -144,6 +156,7 @@ export default {
       showCancelModal: false,
       orderDetails: {},
       selectedOrderId: null,
+      payment_accunt_last_five_number: "",
     };
   },
   async created() {
@@ -179,6 +192,7 @@ export default {
             total_amount: data.reserve_price,
             payment_status: data.payment_status || false,
             cancel_status: data.cancel_status || false,
+            payment_accunt_last_five_number: data.payment_accunt_last_five_number,
           });
         });
 
@@ -220,7 +234,7 @@ export default {
       if (!this.selectedOrderId) return;
 
       try {
-        const orderRef = doc(db, "reservations", this.selectedOrderId);
+        const orderRef = doc(db, "reservations", this.order_id);
         await updateDoc(orderRef, { cancel_status: true });
 
         this.showCancelModal = false;
@@ -230,6 +244,24 @@ export default {
       } catch (error) {
         console.error("取消訂單時發生錯誤:", error);
         alert("取消訂單失敗，請稍後再試");
+      }
+    },
+    async updatePaymentAccuntLastFiveNumber() {
+      try {
+        const orderRef = doc(db, "reservations", this.orderDetails.original_id);
+        const updateData = {
+          payment_accunt_last_five_number: this.payment_accunt_last_five_number
+        };
+        if (this.payment_accunt_last_five_number.trim() !== '') {
+          updateData.payment_status = true;
+        }
+        await updateDoc(orderRef, updateData);
+        alert("付款帳號末五碼資料更新成功！");
+        await this.fetchUserOrders();
+        this.showOrderModal = false;
+      } catch (error) {
+        console.error("更新付款帳號末五碼資料失敗：", error);
+        alert("更新失敗，請稍後再試！");
       }
     },
   },
