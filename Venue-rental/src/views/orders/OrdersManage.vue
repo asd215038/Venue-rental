@@ -108,6 +108,9 @@
                 </span>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              {{ reservation.payment_accunt_last_five_number }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
               <span :class="{
                 'px-2 py-1 rounded-full text-xs font-medium': true,
                 'bg-red-100 text-red-600 hover:bg-red-200': reservation.cancel_status === true,
@@ -187,6 +190,7 @@ export default {
         reserve_price: "預約金額",
         reserve_user: "預約人",
         payment_status: "付款狀態",
+        payment_accunt_last_five_number: "付款帳號末五碼",
         cancel_status: "訂單狀態",
         operations: "操作"
       },
