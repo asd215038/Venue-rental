@@ -94,10 +94,6 @@
         <h3 class="text-lg font-bold text-gray-800 mb-3">付款方式</h3>
         <div class="space-y-2">
           <label class="flex items-center space-x-3">
-            <input type="radio" v-model="paymentMethod" value="onsite" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
-            <span class="text-sm text-gray-600">現場付款</span>
-          </label>
-          <label class="flex items-center space-x-3">
             <input type="radio" v-model="paymentMethod" value="online" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
             <span class="text-sm text-gray-600">線上付款</span>
           </label>
@@ -193,6 +189,7 @@ export default {
       payment_status: false,
       cancel_status: false,
       expired_status: false,
+      payment_accunt_last_five_number: "",
     };
   },
   async created() {
@@ -402,9 +399,10 @@ export default {
             reserve_venue: this.venueName || this.selectedVenue,
             reserve_price: this.pricePerHour,
             order_date: new Date().toISOString().split('T')[0], // 新增訂單日期
-            payment_status: this.paymentMethod === 'online',
+            payment_status: this.payment_status,
             cancel_status: this.cancel_status,
             expired_status: this.expired_status,
+            payment_accunt_last_five_number: this.payment_accunt_last_five_number,
           };
 
           // 使用 setDoc 新增文件
