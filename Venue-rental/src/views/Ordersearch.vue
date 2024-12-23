@@ -28,15 +28,21 @@
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="order in orders" :key="order.order_id" class="hover:bg-gray-50 transition-colors">
+            <tr v-for="order in orders" :key="order.original_id" class="hover:bg-gray-50 transition-colors">
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                 {{ order.order_id }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ order.original_id }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 {{ order.reserve_venue }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 {{ order.reserve_date }} {{ order.reserve_time }}:00
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ order.order_date }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 NT$ {{ order.total_amount }}
@@ -47,13 +53,16 @@
                 </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ order.payment_accunt_last_five_number }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 <div class="flex space-x-3">
-                  <button @click="viewOrderDetails(order.order_id)"
+                  <button @click="viewOrderDetails(order.original_id)"
                     class="px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition-colors">
                     查看
                   </button>
                   <button v-if="!order.payment_status && !order.cancel_status"
-                    @click="requestCancellation(order.order_id)"
+                    @click="requestCancellation(order.original_id)"
                     class="px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors">
                     取消訂單
                   </button>
@@ -76,12 +85,22 @@
             </button>
           </div>
           <div class="mb-6">
-            <p><strong>訂單編號:</strong> {{ orderDetails.order_id }}</p>
+            <p><strong>訂單序號:</strong> {{ orderDetails.order_id }}</p>
+            <p><strong>訂單ID:</strong> {{ orderDetails.original_id }}</p>
             <p><strong>場地名稱:</strong> {{ orderDetails.reserve_venue }}</p>
             <p><strong>預約日期:</strong> {{ orderDetails.reserve_date }}</p>
             <p><strong>預約時段:</strong> {{ orderDetails.reserve_time }}:00</p>
             <p><strong>金額:</strong> NT$ {{ orderDetails.total_amount }}</p>
             <p><strong>訂單狀態:</strong> {{ getOrderStatus(orderDetails) }}</p>
+            <p class="flex items-center gap-3 mb-2">
+              <strong>付款帳號末五碼:</strong>
+              <input v-model="payment_accunt_last_five_number" type="text"
+                class="border border-gray-300 rounded px-3 py-1 w-32" maxlength="5" />
+              <button @click="updatePaymentAccuntLastFiveNumber"
+                class="px-4 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                確認
+              </button>
+            </p>
           </div>
           <div class="flex justify-end">
             <button @click="showOrderModal = false"
@@ -126,23 +145,18 @@
 import { db } from "@/config/firebaseConfig";
 import { getAuth } from "firebase/auth";
 import { collection, query, where, getDocs, updateDoc, doc } from "firebase/firestore";
-import homeView from "@/views/HomeView.vue";
 
 export default {
-  computed: {
-    homeView() {
-      return homeView
-    },
-  },
   data() {
     return {
       orders: [],
-      tableHeaders: ["訂單ID", "場地名稱", "預約時間", "總金額", "狀態", "操作"],
+      tableHeaders: ["訂單序號", "訂單ID", "場地名稱", "預約時間", "訂單日期", "總金額", "狀態", "操作"],
       loading: true,
       showOrderModal: false,
       showCancelModal: false,
       orderDetails: {},
       selectedOrderId: null,
+      payment_accunt_last_five_number: "",
     };
   },
   async created() {
@@ -163,31 +177,31 @@ export default {
       this.loading = true;
       try {
         const ordersRef = collection(db, "reservations");
-        const ordersQuery = query(
-          ordersRef,
-          where("reserve_user", "==", currentUser.displayName) // 改用 displayName 查詢
-        );
+        const ordersQuery = query(ordersRef, where("reserve_user", "==", currentUser.displayName));
         const querySnapshot = await getDocs(ordersQuery);
 
-        // 取得訂單資料
-        const ordersList = [];
+        let ordersList = [];
         querySnapshot.forEach((doc) => {
           const data = doc.data();
           ordersList.push({
-            order_id: doc.id,
+            original_id: doc.id,
             reserve_venue: data.reserve_venue,
             reserve_date: data.reserve_date,
             reserve_time: data.reserve_time,
+            order_date: data.order_date || data.reserve_date,
             total_amount: data.reserve_price,
             payment_status: data.payment_status || false,
-            cancel_status: data.cancel_status || false
+            cancel_status: data.cancel_status || false,
+            payment_accunt_last_five_number: data.payment_accunt_last_five_number,
           });
         });
 
-        // 根據日期排序，最新的排在前面
-        this.orders = ordersList.sort((a, b) =>
-          new Date(b.reserve_date) - new Date(a.reserve_date)
-        );
+        ordersList = ordersList.sort((a, b) => new Date(a.order_date) - new Date(b.order_date));
+
+        this.orders = ordersList.map((order, index) => ({
+          ...order,
+          order_id: (index + 1).toString().padStart(4, '0'),
+        }));
       } catch (error) {
         console.error("獲取訂單資料時發生錯誤:", error);
         alert("無法獲取訂單資料，請稍後再試");
@@ -195,64 +209,59 @@ export default {
         this.loading = false;
       }
     },
-
-    // 取得訂單狀態顯示文字
     getOrderStatus(order) {
-      if (order.cancel_status) {
-        return '已取消';
-      }
-      if (order.payment_status) {
-        return '已付款';
-      }
+      if (order.cancel_status) return '已取消';
+      if (order.payment_status) return '已付款';
       return '待付款';
     },
-
-    // 取得狀態顯示樣式
     getStatusClass(order) {
       return {
         'px-2 py-1 rounded-full text-xs font-medium': true,
         'bg-red-100 text-red-600': order.cancel_status,
         'bg-green-100 text-green-600': order.payment_status && !order.cancel_status,
-        'bg-yellow-100 text-yellow-600': !order.payment_status && !order.cancel_status
-      }
+        'bg-yellow-100 text-yellow-600': !order.payment_status && !order.cancel_status,
+      };
     },
-
-    // 查看訂單詳情
     viewOrderDetails(orderId) {
-      const order = this.orders.find((order) => order.order_id === orderId);
-      this.orderDetails = order;
+      this.orderDetails = this.orders.find((order) => order.original_id === orderId);
       this.showOrderModal = true;
     },
-
-    // 發送取消訂單請求
     requestCancellation(orderId) {
       this.selectedOrderId = orderId;
       this.showCancelModal = true;
     },
-
-    // 確認取消訂單
     async confirmCancellation() {
       if (!this.selectedOrderId) return;
 
       try {
-        const orderRef = doc(db, "reservations", this.selectedOrderId);
+        const orderRef = doc(db, "reservations", this.order_id);
+        await updateDoc(orderRef, { cancel_status: true });
 
-        await updateDoc(orderRef, {
-          cancel_status: true
-        });
-
-        // 關閉 Modal 並重置選中的訂單 ID
         this.showCancelModal = false;
         this.selectedOrderId = null;
-
-        // 顯示成功訊息
         alert("已成功取消！");
-
-        // 重新載入訂單資料
         await this.fetchUserOrders();
       } catch (error) {
         console.error("取消訂單時發生錯誤:", error);
         alert("取消訂單失敗，請稍後再試");
+      }
+    },
+    async updatePaymentAccuntLastFiveNumber() {
+      try {
+        const orderRef = doc(db, "reservations", this.orderDetails.original_id);
+        const updateData = {
+          payment_accunt_last_five_number: this.payment_accunt_last_five_number
+        };
+        if (this.payment_accunt_last_five_number.trim() !== '') {
+          updateData.payment_status = true;
+        }
+        await updateDoc(orderRef, updateData);
+        alert("付款帳號末五碼資料更新成功！");
+        await this.fetchUserOrders();
+        this.showOrderModal = false;
+      } catch (error) {
+        console.error("更新付款帳號末五碼資料失敗：", error);
+        alert("更新失敗，請稍後再試！");
       }
     },
   },

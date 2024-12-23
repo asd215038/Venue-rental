@@ -143,7 +143,6 @@
 <script>
 import { db } from '@/config/firebaseConfig';
 import { collection, getDoc, doc, setDoc, getDocs } from 'firebase/firestore';
-import { googleConfig } from '@/config/googleConfig';
 
 export default {
   props: ['venueId'],

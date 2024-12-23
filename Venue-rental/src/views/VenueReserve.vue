@@ -94,10 +94,6 @@
         <h3 class="text-lg font-bold text-gray-800 mb-3">付款方式</h3>
         <div class="space-y-2">
           <label class="flex items-center space-x-3">
-            <input type="radio" v-model="paymentMethod" value="onsite" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
-            <span class="text-sm text-gray-600">現場付款</span>
-          </label>
-          <label class="flex items-center space-x-3">
             <input type="radio" v-model="paymentMethod" value="online" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
             <span class="text-sm text-gray-600">線上付款</span>
           </label>
@@ -193,6 +189,7 @@ export default {
       payment_status: false,
       cancel_status: false,
       expired_status: false,
+      payment_accunt_last_five_number: "",
     };
   },
   async created() {
@@ -381,7 +378,6 @@ export default {
         return;
       }
 
-
       if (!this.acceptedTerms) {
         alert('請先同意使用者條款');
         return;
@@ -402,9 +398,11 @@ export default {
             reserve_user: auth.currentUser.displayName,
             reserve_venue: this.venueName || this.selectedVenue,
             reserve_price: this.pricePerHour,
-            payment_status: this.paymentMethod === 'online',
+            order_date: new Date().toISOString().split('T')[0], // 新增訂單日期
+            payment_status: this.payment_status,
             cancel_status: this.cancel_status,
             expired_status: this.expired_status,
+            payment_accunt_last_five_number: this.payment_accunt_last_five_number,
           };
 
           // 使用 setDoc 新增文件
@@ -423,9 +421,9 @@ export default {
         console.error("預約失敗:", error);
         alert('預約失敗，請稍後再試');
       }
-    },
+    }
   },
-  watch: {
+    watch: {
     // 監聽場地查詢頁面vuex傳入場地
     '$store.state.selectedVenueName': {
       immediate: true,
@@ -475,6 +473,12 @@ export default {
 </script>
 
 <style scoped>
+/* 滾動條 */
+.max-h-72 {
+  max-height: 18rem;
+  overflow-y: auto;
+}
+
 /* 顏色與按鈕 */
 .bg-orange-400 {
   background-color: #f97316;
