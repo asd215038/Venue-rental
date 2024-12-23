@@ -89,6 +89,7 @@
             <p><strong>預約時段:</strong> {{ orderDetails.reserve_time }}:00</p>
             <p><strong>金額:</strong> NT$ {{ orderDetails.total_amount }}</p>
             <p><strong>訂單狀態:</strong> {{ getOrderStatus(orderDetails) }}</p>
+            <p v-if="orderDetails.virtual_payment_code"><strong>付款碼:</strong> {{ orderDetails.virtual_payment_code }}</p>
           </div>
           <div class="flex justify-end">
             <button @click="showOrderModal = false"
@@ -178,6 +179,7 @@ export default {
             total_amount: data.reserve_price,
             payment_status: data.payment_status || false,
             cancel_status: data.cancel_status || false,
+            virtual_payment_code: data.virtual_payment_code || null,
           });
         });
 

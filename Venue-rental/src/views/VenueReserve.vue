@@ -153,6 +153,24 @@
                  disabled:opacity-50 disabled:cursor-not-allowed">
         確認預約
       </button>
+      <!-- 支付 Modal -->
+      <div v-if="paymentModalVisible" class="fixed inset-0 flex items-center justify-center z-50">
+        <div class="fixed inset-0 bg-black opacity-50" @click="paymentModalVisible = false"></div>
+        <div class="bg-white rounded-lg p-8 z-10 max-w-md w-full mx-4">
+          <h3 class="text-xl font-bold text-gray-800 mb-4">線上支付</h3>
+          <p class="text-gray-600 mb-6">您的訂單已成功預約，請使用以下虛擬繳費碼完成支付：</p>
+          <p class="text-gray-600 mb-6">收款行:台灣銀行 銀行代碼:004</p>
+          <div class="bg-gray-100 text-center text-lg font-bold py-4 rounded-lg mb-4">
+            {{ virtualPaymentCode }}
+          </div>
+          <p class="text-sm text-gray-500 mb-6">請於24小時內完成支付，否則訂單將被自動取消。</p>
+          <button @click="confirmAndRedirect" class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+            確認
+          </button>
+        </div>
+      </div>
+
+
     </div>
     <!-- 確認選擇場地Modal -->
     <div v-if="showModal" class="fixed inset-0 flex items-center justify-center z-50">
@@ -191,6 +209,7 @@ export default {
       paymentMethod: "",
       q: [],
       payment_status: false,
+      virtualPaymentCode: '',
       cancel_status: false,
     };
   },
@@ -268,7 +287,10 @@ export default {
         };
       });
     },
-
+    confirmAndRedirect() {
+      this.paymentModalVisible = false; // 關閉支付 Modal
+      this.$router.push('/search'); // 跳轉到訂單查詢頁面
+    },
     // 獲取場地列表
     async fetchVenues() {
       try {
@@ -394,6 +416,12 @@ export default {
         const reservationPromises = this.selectedSlots.map(async (slot, index) => {
           const docId = (currentCount + index + 1).toString();
 
+          // 如果是線上支付，生成虛擬繳費碼
+          const virtualPaymentCode = this.paymentMethod === 'online'
+              ? Math.random().toString().slice(2, 18).replace(/(\d{4})(?=\d)/g, "$1-") // 生成16位数字并格式化为每4位加上"-"
+              : null;
+
+
           const reservationData = {
             reserve_date: slot.date,
             reserve_time: slot.hour.toString(),
@@ -403,20 +431,32 @@ export default {
             order_date: new Date().toISOString().split('T')[0], // 新增訂單日期
             payment_status: this.paymentMethod === 'online',
             cancel_status: this.cancel_status,
+            virtual_payment_code: virtualPaymentCode, // 儲存虛擬繳費碼
           };
 
           // 使用 setDoc 新增文件
-          return setDoc(doc(db, "reservations", docId), reservationData);
+          await setDoc(doc(db, "reservations", docId), reservationData);
+
+          // 如果是線上支付，更新本地的 virtualPaymentCode 狀態
+          if (this.paymentMethod === 'online' && index === 0) {
+            // 只存第一筆的虛擬繳費碼到本地狀態，用於顯示
+            this.virtualPaymentCode = virtualPaymentCode;
+          }
         });
 
         // 等待所有預約完成
         await Promise.all(reservationPromises);
 
-        alert('預約成功！');
+        if (this.paymentMethod === 'online') {
+          this.paymentModalVisible = true; // 顯示支付 Modal
+        } else {
+          alert('預約成功！');
+          this.$router.push('/search'); // 跳轉到訂單查詢頁面
+        }
+
         this.selectedSlots = [];
         this.acceptedTerms = false;
         await this.fetchBookedSlots();
-        this.$router.push('/search');
       } catch (error) {
         console.error("預約失敗:", error);
         alert('預約失敗，請稍後再試');
