@@ -150,7 +150,7 @@ export default {
   data() {
     return {
       orders: [],
-      tableHeaders: ["訂單序號", "訂單ID", "場地名稱", "預約時間", "訂單日期", "總金額", "狀態", "操作"],
+      tableHeaders: ["訂單序號", "訂單ID", "場地名稱", "預約時間", "訂單日期", "總金額", "狀態", "付款帳號末五碼", "操作"],
       loading: true,
       showOrderModal: false,
       showCancelModal: false,
