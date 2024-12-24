@@ -15,6 +15,9 @@ import OrdersManage from '@/views/orders/OrdersManage.vue'
 
 import Venuebrowse from "@/views/Venuebrowse.vue";
 import VenueReserve  from "@/views/VenueReserve.vue";
+import store from '../store'
+import { firebaseAuth } from '@/config/firebaseConfig'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -38,6 +41,17 @@ const router = createRouter({
     { path: "/manage/orders", component: OrdersManage},
 
   ]
+})
+
+
+router.beforeEach((to, from, next) => {
+  const unsubscribe = firebaseAuth.onAuthStateChanged(user => {
+    if (user) {
+      store.dispatch('initAuth')
+    }
+    unsubscribe()
+    next()
+  })
 })
 
 export default router
