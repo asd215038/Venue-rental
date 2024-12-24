@@ -1,39 +1,6 @@
 <template>
     <div class="admin-dashboard">
-      <!-- 導航欄 -->
-      <nav class="bg-white shadow-md">
-        <div class="max-w-6xl mx-auto px-4 py-4">
-          <div class="flex items-center justify-between">
-            <div class="text-xl font-bold text-blue-500">管理後台</div>
-            <div class="space-x-6">
-              <router-link 
-                to="/manage/user" 
-                class="text-gray-600 hover:text-blue-500 transition-colors"
-              >
-                用戶管理
-              </router-link>
-              <router-link 
-                to="/manage/venue" 
-                class="text-gray-600 hover:text-blue-500 transition-colors"
-              >
-                場地管理
-              </router-link>
-              <router-link 
-                to="/manage/news" 
-                class="text-gray-600 hover:text-blue-500 transition-colors"
-              >
-                公告管理
-              </router-link>
-              <router-link 
-                to="/manage/orders" 
-                class="text-gray-600 hover:text-blue-500 transition-colors"
-              >
-                訂單管理
-              </router-link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <backendNavbar />
       
       <!-- 快速操作區塊 -->
       <div class="quick-actions max-w-6xl mx-auto px-4 py-8">
@@ -141,9 +108,12 @@
   </template>
   
   <script>
+  import backendNavbar from '@/components/backendNavbar.vue';
   export default {
     name: 'AdminDashboard',
-    
+    components: {
+      backendNavbar
+    },
     data() {
       return {
         todayBookings: 24,

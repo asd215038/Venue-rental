@@ -1,15 +1,10 @@
 <template>
+  <backendNavbar />
+
   <div class="max-w-6xl mx-auto px-4 py-8">
     <!-- 頁面標題與按鈕 -->
     <div class="flex justify-between items-center mb-6">
       <div class="flex items-center space-x-4">
-        <button
-            @click="$router.go(-1)"
-            class="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors flex items-center"
-        >
-          <span class="mr-2">←</span>
-          返回
-        </button>
         <h2 class="text-2xl font-bold text-blue-500">訂單管理</h2>
       </div>
     </div>
@@ -175,9 +170,13 @@
 
 <script>
 import { db } from "@/config/firebaseConfig";
+import backendNavbar from '@/components/backendNavbar.vue';
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 
 export default {
+  components: {
+    backendNavbar
+  },
   data() {
     return {
       reservations: [],
