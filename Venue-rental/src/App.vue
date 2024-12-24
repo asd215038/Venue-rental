@@ -1,7 +1,11 @@
 <template>
-  <NavBar></NavBar>
-  <router-view />
-  <Footer></Footer>
+  <div class="app-container">
+    <NavBar />
+    <main class="main-content">
+      <router-view />
+    </main>
+    <Footer />
+  </div>
 </template>
 
 <script>
@@ -16,5 +20,13 @@ export default {
 </script>
 
 <style>
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
+.main-content {
+  flex: 1;
+}
 </style>
