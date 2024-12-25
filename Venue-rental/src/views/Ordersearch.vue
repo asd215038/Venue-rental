@@ -62,7 +62,7 @@
                     查看
                   </button>
                   <button v-if="!order.payment_status && !order.cancel_status"
-                    @click="requestCancellation(order.original_id)"
+                    @click="openCancelModal(order.original_id)"
                     class="px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors">
                     取消訂單
                   </button>
@@ -226,7 +226,7 @@ export default {
       this.orderDetails = this.orders.find((order) => order.original_id === orderId);
       this.showOrderModal = true;
     },
-    requestCancellation(orderId) {
+    openCancelModal(orderId) {
       this.selectedOrderId = orderId;
       this.showCancelModal = true;
     },
@@ -234,7 +234,7 @@ export default {
       if (!this.selectedOrderId) return;
 
       try {
-        const orderRef = doc(db, "reservations", this.order_id);
+        const orderRef = doc(db, "reservations", this.selectedOrderId);
         await updateDoc(orderRef, { cancel_status: true });
 
         this.showCancelModal = false;
