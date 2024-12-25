@@ -113,6 +113,7 @@
             <p><strong>預約時段:</strong> {{ orderDetails.reserve_time }}:00</p>
             <p><strong>金額:</strong> NT$ {{ orderDetails.total_amount }}</p>
             <p><strong>訂單狀態:</strong> {{ getOrderStatus(orderDetails) }}</p>
+            <p><strong>匯款帳號:</strong> {{ formatVirtualAccount(virtualAccount) }}</p>
             <p class="flex items-center gap-3 mb-2">
               <strong>付款帳號末五碼:</strong>
               <input
@@ -215,6 +216,7 @@ export default {
       orderDetails: {},
       selectedOrderId: null,
       payment_accunt_last_five_number: "",
+      virtualAccount:""
     };
   },
   async created() {
@@ -251,6 +253,7 @@ export default {
             reserve_time: data.reserve_time,
             order_date: data.order_date || data.reserve_date,
             total_amount: data.reserve_price,
+            virtual_account: data.virtual_account || "無虛擬帳號", // 獲取虛擬帳號
             payment_status: data.payment_status || false,
             cancel_status: data.cancel_status || false,
             payment_accunt_last_five_number:
@@ -291,11 +294,19 @@ export default {
       };
     },
     viewOrderDetails(orderId) {
-      this.orderDetails = this.orders.find(
-        (order) => order.original_id === orderId
-      );
+      this.orderDetails = this.orders.find((order) => order.original_id === orderId);
+      this.virtualAccount = this.orderDetails.virtual_account; // 將虛擬帳號設定為當前訂單的虛擬帳號
       this.showOrderModal = true;
     },
+    formatVirtualAccount(account) {
+      if (!account) return "無虛擬帳號"; // 如果帳號為空，顯示提示
+
+      // 去除非數字字符和空格
+      const cleanedAccount = account.replace(/\D+/g, "");
+
+      // 確保每4位添加一個 "-" 並處理所有數字
+      return cleanedAccount.replace(/(.{4})/g, "$1-").replace(/-$/, ""); // 最後可能多餘的 "-" 移除
+  },
     openCancelModal(orderId) {
       this.selectedOrderId = orderId;
       this.showCancelModal = true;

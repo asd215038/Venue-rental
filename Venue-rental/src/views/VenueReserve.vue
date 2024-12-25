@@ -213,6 +213,27 @@
       >
         確認預約
       </button>
+      <!-- 虛擬帳號 Modal -->
+      <div v-if="showVirtualAccountModal" class="fixed inset-0 flex items-center justify-center z-50">
+        <div class="fixed inset-0 bg-black opacity-50"></div>
+        <div class="bg-white rounded-lg p-8 z-10 max-w-md w-full mx-4">
+          <h3 class="text-xl font-bold text-gray-800 mb-4">付款資訊</h3>
+          <p class="text-gray-600 mb-4">
+            您的虛擬帳號如下，請於 24 小時內完成付款：
+          </p>
+          <p class="text-gray-500 text-sm mt-4">收款銀行: 台灣銀行 銀行代碼: 004</p>
+          <div class="bg-gray-100 text-gray-800 font-mono text-center py-4 rounded-lg text-lg">
+            {{ formatVirtualAccount(virtualAccount) }}
+          </div>
+          <p class="text-gray-500 text-sm mt-4">請務必於繳費期限內完成付款，否則訂單將自動取消。</p>
+          <button @click="closeVirtualAccountModal"
+                  class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors mt-4">
+            確認
+          </button>
+        </div>
+      </div>
+
+
     </div>
 
     <!-- 確認選擇場地Modal -->
@@ -278,6 +299,8 @@ export default {
       isDragging: false,
       dragStart: null,
       dragEnd: null,
+      showVirtualAccountModal: false, // 控制虛擬帳號 Modal
+      virtualAccount: "", // 儲存生成的虛擬帳號
     };
   },
   async created() {
@@ -326,9 +349,9 @@ export default {
         this.showModal = true;
         return;
       }
-      const slot = { day, hour, date };
+      const slot = {day, hour, date};
       const index = this.selectedSlots.findIndex(
-        (slot) => slot.day === day && slot.hour === hour
+          (slot) => slot.day === day && slot.hour === hour
       );
       if (index === -1) {
         this.selectedSlots.push(slot);
@@ -336,6 +359,25 @@ export default {
         this.selectedSlots.splice(index, 1);
       }
     },
+    async closeVirtualAccountModal() {
+      this.showVirtualAccountModal = false;
+      toast.success("預約成功！", {
+          autoClose: 1000,
+          position: toast.POSITION.TOP_CENTER,
+        });
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      this.$router.push('/search');
+    },
+    formatVirtualAccount(account) {
+      if (!account) return "無虛擬帳號"; // 如果帳號為空，顯示提示
+
+      // 去除非數字字符和空格
+      const cleanedAccount = account.replace(/\D+/g, "");
+
+      // 確保每4位添加一個 "-" 並處理所有數字
+      return cleanedAccount.replace(/(.{4})/g, "$1-").replace(/-$/, ""); // 最後可能多餘的 "-" 移除
+    },
+
     // 更新一周的日期
     updateWeekDays() {
       const today = new Date(this.selectedDate); // 使用 selectedDate 而不是 today
@@ -485,6 +527,10 @@ export default {
         const querySnapshot = await getDocs(collection(db, "reservations"));
         let currentCount = querySnapshot.size;
 
+        // 为所有选中的时段生成一个统一的虚拟账户
+        const virtualAccount = Math.floor(100000000000 + Math.random() * 900000000000).toString();
+        this.virtualAccount = virtualAccount;
+
         // 為每個選取的時段建立預約記錄
         const reservationPromises = this.selectedSlots.map(
           async (slot, index) => {
@@ -496,12 +542,12 @@ export default {
               reserve_user: auth.currentUser.displayName,
               reserve_venue: this.venueName || this.selectedVenue,
               reserve_price: this.pricePerHour,
-              order_date: new Date().toISOString().split("T")[0], // 新增訂單日期
+              order_date: new Date().toISOString().split('T')[0], // 新增訂單日期
               payment_status: this.payment_status,
               cancel_status: this.cancel_status,
               expired_status: this.expired_status,
-              payment_accunt_last_five_number:
-                this.payment_accunt_last_five_number,
+              virtual_account: virtualAccount, // 添加虛擬帳號
+              payment_accunt_last_five_number: this.payment_accunt_last_five_number,
             };
 
             // 使用 setDoc 新增文件
@@ -511,16 +557,12 @@ export default {
 
         // 等待所有預約完成
         await Promise.all(reservationPromises);
-
-        toast.success("預約成功！", {
-          autoClose: 1000,
-          position: toast.POSITION.TOP_CENTER,
-        });
+        
+        this.showVirtualAccountModal = true;
+      
         this.selectedSlots = [];
         this.acceptedTerms = false;
         await this.fetchBookedSlots();
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        this.$router.push("/search");
       } catch (error) {
         toast.error("預約失敗，請稍後再試", {
           autoClose: 1000,
