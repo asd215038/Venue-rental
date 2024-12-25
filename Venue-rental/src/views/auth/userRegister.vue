@@ -27,7 +27,7 @@
           <div class="flex items-center justify-end space-x-2">
             <label class="w-20 text-right">密碼：</label>
             <div class="flex-1 max-w-xs">
-              <input type="password" v-model="user.password"
+              <input type="password" v-model="user.password" @input="checkPassword"
                      class="w-4/5 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
             </div>
           </div>
@@ -97,6 +97,8 @@
 import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
 import { db } from '@/config/firebaseConfig';
 import { setDoc, collection, getDocs, doc } from 'firebase/firestore';
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
 export default {
   data() {
@@ -116,17 +118,6 @@ export default {
   },
   methods: {
     async registerAndPost() {
-      // 密碼檢查
-      if (this.user.password !== this.confirmPassword) {
-        alert("密碼不一致，請確認密碼。");
-        return;
-      }
-
-      // 密碼長度檢查
-      if (this.user.password.length < 6) {
-        alert("密碼長度至少需要6個字元");
-        return;
-      }
 
       try {
         const auth = getAuth();
@@ -164,24 +155,33 @@ export default {
           isAdmin: this.user.isAdmin,
           enabled: this.user.enabled,
         });
-
-        alert("註冊成功！驗證信已發送到您的信箱，請查收。");
-
+        
+        toast.success("註冊成功！驗證信已發送到您的信箱，請查收。", {
+          autoClose: 1000,
+          position: toast.POSITION.TOP_CENTER,
+        });
         // 註冊後導航到主頁或其他頁面
+        await new Promise(resolve => setTimeout(resolve, 1000));
         this.$router.push("/login");
       } catch (error) {
-        // 更詳細的錯誤處理
+        let msg = "";
         switch (error.code) {
           case 'auth/email-already-in-use':
-            alert('此電子郵件已被使用');
+            msg = "此電子郵件已被使用";
             break;
           case 'auth/invalid-email':
-            alert('無效的電子郵件地址');
+            msg = "無效的電子郵件地址";
+            break;
+          case 'auth/weak-password':
+            msg = "密碼不足6位";
             break;
           default:
-            alert("註冊失敗：" + error.message);
+            msg = "註冊失敗：" + error.message;
         }
-        console.error(error);
+        toast.warn(msg, {
+          autoClose: 1000,
+          position: toast.POSITION.TOP_CENTER,
+        });
       }
     }
   }

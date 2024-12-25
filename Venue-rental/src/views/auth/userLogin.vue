@@ -57,6 +57,8 @@
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { db } from '@/config/firebaseConfig';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
 export default {
   data() {
@@ -83,7 +85,10 @@ export default {
         if (!querySnapshot.empty) {
           const userData = querySnapshot.docs[0].data();
           if (userData.is_delete) {
-            alert("此帳號已被停用，請聯繫管理員。");
+            toast.error("此帳號已被停用，請聯繫管理員。", {
+              autoClose: 1000,
+              position: toast.POSITION.TOP_CENTER,
+            });
             return;
           }
         }
@@ -102,28 +107,33 @@ export default {
         if (!user.emailVerified) {
           // 如果未驗證，強制登出並顯示錯誤訊息
           await auth.signOut();
-          alert("請先確認您的電子郵件。");
           return;
         }
 
         // 如果登入成功，將用戶重定向到主頁
         this.$router.push("/");
       } catch (error) {
-        console.error("Login error:", error);
-        // 顯示登入錯誤訊息
+        let msg = "";
         switch (error.code) {
           case 'auth/user-not-found':
-            alert('用戶未找到');
+            msg = "用戶未找到，請確認您的電子郵件地址是否正確。";
             break;
           case 'auth/wrong-password':
-            alert('密碼錯誤');
+            msg = "密碼錯誤，請再試一次。";
+            break;
+          case 'auth/missing-password':
+            msg = "請輸入密碼。";
             break;
           case 'auth/invalid-email':
-            alert('無效的電子郵件地址');
+            msg = "無效的電子郵件地址";
             break;
           default:
-            alert("登入失敗：" + error.message);
+            msg = "登入失敗：" + error.message;
         }
+        toast.error(msg, {
+          autoClose: 1000,
+          position: toast.POSITION.TOP_CENTER,
+        });
       }
     }
   }

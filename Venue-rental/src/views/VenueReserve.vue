@@ -252,6 +252,8 @@ import {
   doc,
   orderBy,
 } from "firebase/firestore";
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
 export default {
   data() {
@@ -463,12 +465,18 @@ export default {
         return;
       }
       if (!this.paymentMethod) {
-        alert("請選擇付款方式");
+        toast.warn("請選擇付款方式", {
+          autoClose: 1000,
+          position: toast.POSITION.TOP_CENTER,
+        });
         return;
       }
 
       if (!this.acceptedTerms) {
-        alert("請先同意使用者條款");
+        toast.warn("請先同意使用者條款", {
+          autoClose: 1000,
+          position: toast.POSITION.TOP_CENTER,
+        });
         return;
       }
 
@@ -504,14 +512,20 @@ export default {
         // 等待所有預約完成
         await Promise.all(reservationPromises);
 
-        alert("預約成功！");
+        toast.success("預約成功！", {
+          autoClose: 1000,
+          position: toast.POSITION.TOP_CENTER,
+        });
         this.selectedSlots = [];
         this.acceptedTerms = false;
         await this.fetchBookedSlots();
+        await new Promise(resolve => setTimeout(resolve, 1000));
         this.$router.push("/search");
       } catch (error) {
-        console.error("預約失敗:", error);
-        alert("預約失敗，請稍後再試");
+        toast.error("預約失敗，請稍後再試", {
+          autoClose: 1000,
+          position: toast.POSITION.TOP_CENTER,
+        });
       }
     },
     startDrag(day, hour) {

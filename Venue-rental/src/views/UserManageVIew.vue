@@ -165,6 +165,8 @@
 import { db } from "@/config/firebaseConfig";
 import backendNavbar from '@/components/backendNavbar.vue';
 import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
 export default {
   components: {
@@ -219,12 +221,17 @@ export default {
           enabled: this.editUserData.enabled,
           isAdmin: this.editUserData.isAdmin,
         });
-        alert("用戶資料更新成功！");
+        toast.sucess("用戶資料更新成功！", {
+          autoClose: 1000,
+          position: toast.POSITION.TOP_CENTER,
+        });
         this.closeEditModal();
         await this.getUsers(); // 重新載入用戶列表
       } catch (error) {
-        console.error("更新用戶資料失敗：", error);
-        alert("更新失敗，請稍後再試！");
+        toast.error("更新失敗，請稍後再試！", {
+          autoClose: 1000,
+          position: toast.POSITION.TOP_CENTER,
+        });
       }
     },
     async toggleDeleteStatus(userId, currentStatus) {
@@ -234,10 +241,15 @@ export default {
           is_delete: !currentStatus,
         });
         await this.getUsers();
-        alert(currentStatus ? "用戶已還原" : "用戶已刪除");
+        toast.info(currentStatus ? "用戶已還原" : "用戶已刪除", {
+          autoClose: 1000,
+          position: toast.POSITION.TOP_CENTER,
+        });
       } catch (error) {
-        console.error("更新用戶狀態時發生錯誤：", error);
-        alert("操作失敗");
+        toast.error("操作失敗", {
+          autoClose: 1000,
+          position: toast.POSITION.TOP_CENTER,
+        });
       }
     },
   },

@@ -3,6 +3,9 @@ import { firebaseAuth } from '@/config/firebaseConfig';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 import { doc, updateDoc } from 'firebase/firestore';
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
+
 export default createStore({
   state: {
     user: {
@@ -64,7 +67,10 @@ export default createStore({
             enabled: false, // 初始設置為未啟用
           });
 
-          alert('註冊成功！驗證信已發送到您的信箱，請查收。');
+          toast.info('註冊成功！驗證信已發送到您的信箱，請查收。',{
+            autoClose: 1000,
+            position: toast.POSITION.TOP_CENTER,
+          });
         } else {
           throw new Error('Unable to register user');
         }
