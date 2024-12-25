@@ -97,9 +97,13 @@
                 <span :class="{
                   'px-2 py-1 rounded-full text-xs font-medium': true,
                   'bg-green-100 text-green-600 hover:bg-green-200': reservation.payment_status === true,
-                  'bg-red-100 text-red-600 hover:bg-red-200': reservation.payment_status === false
+                  'bg-red-100 text-red-600 hover:bg-red-200': reservation.payment_status === false,
+                  'bg-yellow-100 text-yellow-600 hover:bg-yellow-200': reservation.payment_status === false && reservation.payment_accunt_last_five_number
                 }">
-                  {{ reservation.payment_status ? '已付款' : '未付款' }}
+                  {{ 
+                  reservation.payment_status ? '已付款' : 
+                  reservation.payment_accunt_last_five_number ? '待付款' : '未付款'
+                  }}
                 </span>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -116,6 +120,11 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 <button 
+                  @click="openPaymentModal(reservation.reserveId)"
+                  class="px-2 py-1 bg-blue-100 text-blue-600 rounded-full text-xs font-medium hover:bg-blue-200 mr-2"
+                  v-if="reservation.payment_status === false && reservation.payment_accunt_last_five_number"
+                  >確認匯款</button>
+                <button 
                   @click="openDeleteModal(reservation.reserveId)"
                   class="px-2 py-1 bg-red-100 text-red-600 rounded-full text-xs font-medium hover:bg-red-200 "
                 >
@@ -125,6 +134,43 @@
           </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- 匯款確認 Modal -->
+      <div 
+        v-if="showPaymentModal" 
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      >
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-4">
+          <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-xl font-bold text-gray-900">確認匯款資訊</h3>
+              <button 
+                @click="showPaymentModal = false"
+                class="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <span class="text-2xl">&times;</span>
+              </button>
+            </div>
+            <div class="mb-6">
+              <p class="text-gray-600">確定已匯款嗎？此操作無法復原。</p>
+            </div>
+            <div class="flex justify-end space-x-4">
+              <button 
+                @click="showPaymentModal = false"
+                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                取消
+              </button>
+              <button 
+                @click="confirmPayment"
+                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                確認匯款
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- 刪除確認 Modal -->
@@ -163,7 +209,6 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </template>
@@ -171,7 +216,7 @@
 <script>
 import { db } from "@/config/firebaseConfig";
 import backendNavbar from '@/components/backendNavbar.vue';
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, updateDoc, doc } from "firebase/firestore";
 
 export default {
   components: {
@@ -202,7 +247,9 @@ export default {
       sortAsc: true,
       loading: true,
       reservationIdToDelete: null,
+      reservationIdToPay: null,
       showDeleteModal: false,
+      showPaymentModal: false,
     };
   },
   async mounted() {
@@ -264,6 +311,10 @@ export default {
       this.reservationIdToDelete = newsId;
       this.showDeleteModal = true;
     },
+    openPaymentModal(reservationId) {
+      this.reservationIdToPay = reservationId;
+      this.showPaymentModal = true;
+    },
     async confirmDelete() {
       if (this.reservationIdToDelete) {
         try {
@@ -275,6 +326,20 @@ export default {
         }
         this.reservationIdToDelete = null;
         this.showDeleteModal = false;
+      }
+    },
+    async confirmPayment() {
+      if (this.reservationIdToPay) {
+        try {
+          const orderRef = doc(db, "reservations", this.reservationIdToPay);
+          await updateDoc(orderRef, {"payment_status": true});
+          await this.getReservations(); // 重新載入公告列表
+          console.log("訂單已確認付款成功！");
+        } catch (error) {
+          console.error("確認付款時發生錯誤:", error);
+        }
+        this.reservationIdToPay = null;
+        this.showPaymentModal = false;
       }
     },
   },

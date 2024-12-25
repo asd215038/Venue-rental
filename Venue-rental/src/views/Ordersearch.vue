@@ -252,9 +252,6 @@ export default {
         const updateData = {
           payment_accunt_last_five_number: this.payment_accunt_last_five_number
         };
-        if (this.payment_accunt_last_five_number.trim() !== '') {
-          updateData.payment_status = true;
-        }
         await updateDoc(orderRef, updateData);
         alert("付款帳號末五碼資料更新成功！");
         await this.fetchUserOrders();
