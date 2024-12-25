@@ -31,14 +31,6 @@
           </button>
         </div>
 
-        <!-- Success or Error Message -->
-        <div v-if="successMessage" class="mt-4 text-center text-green-500">
-          {{ successMessage }}
-        </div>
-        <div v-if="errorMessage" class="mt-4 text-center text-red-500">
-          {{ errorMessage }}
-        </div>
-
         <!-- Back to Login Link -->
         <div class="mt-4 flex justify-center">
           <router-link
@@ -55,6 +47,8 @@
 
 <script>
 import { getAuth, sendPasswordResetEmail } from "firebase/auth";
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
 export default {
   data() {
@@ -72,7 +66,10 @@ export default {
       this.errorMessage = null;
 
       if (!this.email) {
-        this.errorMessage = "請輸入電子信箱";
+        toast.error("請輸入電子信箱", {
+          autoClose: 1000,
+          position: toast.POSITION.TOP_CENTER,
+        });
         return;
       }
 
@@ -82,6 +79,10 @@ export default {
         const auth = getAuth();
         await sendPasswordResetEmail(auth, this.email);
         this.successMessage = "重設密碼的電子郵件已發送，請檢查您的信箱。";
+        toast.success(this.successMessage, {
+          autoClose: 1000,
+          position: toast.POSITION.TOP_CENTER,
+        });
         this.email = ""; // 重置輸入框
       } catch (error) {
         switch (error.code) {
@@ -94,7 +95,10 @@ export default {
           default:
             this.errorMessage = "發送失敗：" + error.message;
         }
-        console.error(error);
+        toast.error(this.errorMessage, {
+          autoClose: 1000,
+          position: toast.POSITION.TOP_CENTER,
+        });
       } finally {
         this.loading = false;
       }

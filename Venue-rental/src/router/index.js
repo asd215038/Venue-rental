@@ -11,8 +11,7 @@ import NewsView from '../views/news/NewsView.vue'
 import addNews from '../views/news/addNews.vue'
 import ordersearch from "@/views/Ordersearch.vue";
 import OrdersManage from '@/views/orders/OrdersManage.vue'
-
-
+import forgotPassword from '@/views/auth/forgotPassword.vue'
 import Venuebrowse from "@/views/Venuebrowse.vue";
 import VenueReserve  from "@/views/VenueReserve.vue";
 import store from '../store'
@@ -23,6 +22,7 @@ const router = createRouter({
   routes: [
     { path: '/', name: 'home', component: HomeView },
     { path: "/login", component: userLogin },
+    { path: "/forgotPassword", component: forgotPassword },
     { path: "/register", component: userRegister },
     { path: "/logout", component: userLogout },
     {path: "/venue", component: Venuebrowse},
