@@ -1,5 +1,5 @@
 <template>
-  <footer class="footer custom-footer">
+  <footer class="footer custom-footer bg-sky-500">
     <div class="text-center">
       <p>© 2024 Your Company Name. All rights reserved.</p>
       <ul class="footer-links" >
@@ -20,7 +20,6 @@ export default {
 
 <style scoped>
 .custom-footer {
-  background-color: #39B3E3;
   color: white;
   padding: 20px 0;
   width: 100%;
