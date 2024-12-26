@@ -221,14 +221,14 @@ export default {
           enabled: this.editUserData.enabled,
           isAdmin: this.editUserData.isAdmin,
         });
-        toast.sucess("用戶資料更新成功！", {
+        toast.success("用戶資料更新成功！", {
           autoClose: 1000,
           position: toast.POSITION.TOP_CENTER,
         });
         this.closeEditModal();
         await this.getUsers(); // 重新載入用戶列表
       } catch (error) {
-        toast.error("更新失敗，請稍後再試！", {
+        toast.error("更新失敗，請稍後再試！" + error, {
           autoClose: 1000,
           position: toast.POSITION.TOP_CENTER,
         });

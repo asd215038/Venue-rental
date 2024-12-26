@@ -110,6 +110,12 @@ export default {
           return;
         }
 
+        toast.success("登入成功！", {
+          autoClose: 1000,
+          position: toast.POSITION.TOP_CENTER,
+        });
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
         // 如果登入成功，將用戶重定向到主頁
         this.$router.push("/");
       } catch (error) {
